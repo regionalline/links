@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Региональная Линия — Справочник спортивных чемпионатов</title>
+  <!-- Подключаем Tailwind CSS для адаптивного и чистого интерфейса -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Подключаем шрифт Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    /* Плавное появление экранов при переключении */
+    .fade-in {
+      animation: fadeIn 0.2s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
+
+  <!-- =====================================================================
+       ШАПКА САЙТА (Единая для всех экранов)
+       ===================================================================== -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-4">
+      <!-- Логотип / Название, клик возвращает на главную -->
+      <button type="button" id="brandLink" onclick="window.appNavigateHome && window.appNavigateHome()" class="flex items-center gap-3 group focus:outline-none text-left cursor-pointer">
+        <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-sm group-hover:bg-blue-700 transition-colors shrink-0">
+          РЛ
+        </div>
+        <div>
+          <div class="flex flex-wrap items-center gap-2">
+            <h1 class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight leading-tight group-hover:text-blue-600 transition-colors">
+              Региональная Линия
+            </h1>
+            <span id="headerSummaryBadge" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200/70">
+              13 разделов &bull; 117 турниров &bull; 167 ссылок
+            </span>
+          </div>
+          <p class="text-xs text-slate-500 mt-0.5">Справочник региональных чемпионатов и источников результатов</p>
+        </div>
+      </button>
+
+      <!-- Кнопка раскрытия мини-инструкции -->
+      <button
+        type="button"
+        id="toggleGuideBtn"
+        onclick="window.appToggleGuide && window.appToggleGuide()"
+        aria-expanded="false"
+        class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer shrink-0"
+      >
+        <svg class="w-4 h-4 text-blue-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10"></circle>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 16v-4m0-4h.01"></path>
+        </svg>
+        <span>Как пользоваться</span>
+      </button>
+    </div>
+
+    <!-- Скрываемая плашка с инструкцией -->
+    <div id="guidePanel" class="hidden border-t border-slate-200 bg-blue-50/70">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 py-4 text-sm text-slate-700">
+        <div class="flex items-start justify-between gap-4">
+          <p class="leading-relaxed text-slate-700">
+            Выберите нужный вид спорта из списка ниже или введите название страны, лиги или примечания в строку поиска. Нажмите на любую ссылку справа от чемпионата, чтобы открыть источник в новой вкладке.
+          </p>
+          <button
+            type="button"
+            id="closeGuideBtn"
+            onclick="window.appToggleGuide && window.appToggleGuide(false)"
+            class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-200/60 transition-colors cursor-pointer shrink-0"
+            title="Закрыть подсказку"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- =====================================================================
+       ОСНОВНОЙ КОНТЕНТ (Динамически переключается между Главной и Разделом)
+       ===================================================================== -->
+  <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8">
+
+    <!-- -------------------------------------------------------------------
+         ЭКРАН 1: ГЛАВНАЯ СТРАНИЦА (Виды спорта + Глобальный поиск)
+         ------------------------------------------------------------------- -->
+    <section id="home-view" class="fade-in space-y-6">
+      <!-- Глобальная поисковая строка -->
+      <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm">
+        <label for="globalSearchInput" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
+          Глобальный поиск по всем чемпионатам и примечаниям
+        </label>
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+            <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="8"></circle>
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35"></path>
+            </svg>
+          </div>
+          <input
+            type="text"
+            id="globalSearchInput"
+            placeholder="Поиск по всем видам спорта (страна, лига, примечание)..."
+            autocomplete="off"
+            class="w-full pl-11 pr-10 py-3 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm sm:text-base"
+          >
+          <button
+            type="button"
+            id="clearGlobalSearchBtn"
+            class="hidden absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer font-semibold text-sm"
+            title="Очистить поиск"
+          >
+            &#10005;
+          </button>
+        </div>
+      </div>
+
+      <!-- Блок результатов глобального поиска (появляется при вводе текста) -->
+      <div id="globalSearchResultsContainer" class="hidden space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 id="globalSearchCount" class="text-sm font-semibold text-slate-600">Найдено результатов: 0</h2>
+          <button type="button" id="resetSearchLink" class="text-sm text-blue-600 hover:underline font-medium cursor-pointer">
+            Сбросить поиск
+          </button>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="hidden md:grid md:grid-cols-12 bg-slate-100/80 border-b border-slate-200 px-6 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+            <div class="col-span-5">Раздел / Чемпионат</div>
+            <div class="col-span-7">Ссылки на сайты и примечания</div>
+          </div>
+          <div id="globalSearchResultsList" class="divide-y divide-slate-200"></div>
+        </div>
+      </div>
+
+      <!-- Сетка карточек видов спорта (показывается, когда глобальный поиск пуст) -->
+      <div id="sportsGridContainer" class="space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-base sm:text-lg font-bold text-slate-800">Выберите вид спорта или раздел</h2>
+          <span id="totalStatsBadge" class="text-xs font-medium px-2.5 py-1 rounded-full bg-slate-200/70 text-slate-600"></span>
+        </div>
+        <div id="sportsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Карточки генерируются автоматически из SPORTS_DATA -->
+        </div>
+      </div>
+    </section>
+
+    <!-- -------------------------------------------------------------------
+         ЭКРАН 2: СТРАНИЦА КОНКРЕТНОГО ВИДА СПОРТА
+         ------------------------------------------------------------------- -->
+    <section id="sport-view" class="hidden fade-in space-y-5">
+      <!-- Верхняя панель навигации раздела -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <button
+          type="button"
+          id="backToHomeBtn"
+          onclick="window.appNavigateHome && window.appNavigateHome()"
+          class="inline-flex items-center gap-2 self-start px-4 py-2.5 rounded-xl bg-white border border-slate-200 hover:bg-slate-100 hover:border-slate-300 text-slate-700 font-medium text-sm shadow-sm transition-all cursor-pointer"
+        >
+          <span>&larr; Назад ко всем видам спорта</span>
+        </button>
+
+        <span id="sportDetailCount" class="text-xs font-medium text-slate-500"></span>
+      </div>
+
+      <!-- Заголовок выбранного спорта и локальный поиск внутри него -->
+      <div class="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+        <div class="flex items-center gap-3">
+          <span id="sportDetailIcon" class="text-3xl sm:text-4xl select-none"></span>
+          <div>
+            <h2 id="sportDetailTitle" class="text-xl sm:text-2xl font-bold text-slate-900"></h2>
+            <p class="text-xs sm:text-sm text-slate-500">Список чемпионатов, лиг и официальных ссылок</p>
+          </div>
+        </div>
+
+        <!-- Локальный поиск по чемпионатам внутри выбранного вида спорта -->
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="8"></circle>
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35"></path>
+            </svg>
+          </div>
+          <input
+            type="text"
+            id="localSearchInput"
+            placeholder="Фильтр внутри раздела..."
+            autocomplete="off"
+            class="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+          >
+          <button
+            type="button"
+            id="clearLocalSearchBtn"
+            class="hidden absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer font-semibold text-xs"
+            title="Очистить фильтр"
+          >
+            &#10005;
+          </button>
+        </div>
+      </div>
+
+      <!-- Двухколоночная таблица / список чемпионатов -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <!-- Шапка 2 колонок для десктопа -->
+        <div class="hidden md:grid md:grid-cols-12 bg-slate-100/80 border-b border-slate-200 px-6 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+          <div class="col-span-5">Чемпионат / Страна / Лига</div>
+          <div class="col-span-7">Ссылки на сайты и примечания</div>
+        </div>
+
+        <!-- Строки чемпионатов -->
+        <div id="championshipsList" class="divide-y divide-slate-200">
+          <!-- Генерируется автоматически -->
+        </div>
+
+        <!-- Сообщение, если локальный поиск ничего не нашёл -->
+        <div id="localEmptyState" class="hidden py-12 px-4 text-center text-slate-500 text-sm">
+          По вашему запросу в этом виде спорта ничего не найдено.
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Подвал -->
+  <footer class="max-w-5xl w-full mx-auto px-4 sm:px-6 py-6 text-center text-xs text-slate-400">
+    Региональная Линия &bull; Справочник турниров и официальных сайтов
+  </footer>
+
+  <!-- =====================================================================
+       ДАННЫЕ И ЛОГИКА РАБОТЫ САЙТА
+       ===================================================================== -->
+  <script>
+    /**
+     * =====================================================================
+     * БАЗА ДАННЫХ ЧЕМПИОНАТОВ (SPORTS_DATA)
+     * =====================================================================
+     * Как редактировать вручную:
+     * 1. Каждый вид спорта — это объект вида:
+     *    { sport: "Название спорта", championships: [ ... ] }
+     * 2. Каждый чемпионат внутри championships — это объект:
+     *    {
+     *      name: "Название страны или турнира",
+     *      links: [
+     *        { sub: "Подкатегория (если есть, иначе '')", url: "https://...", note: "Примечание (если есть, иначе '')" }
+     *      ]
+     *    }
+     * Просто скопируйте любой блок, вставьте через запятую и замените текст.
+     */
+    const SPORTS_DATA = [
+      {
+        "sport": "Футбол",
+        "championships": [
+          { "name": "Чемпионат ОАЭ. 3 дивизион", "links": [{ "sub": "", "url": "https://www.uaefa.ae/en/competition/2574", "note": "" }] },
+          { "name": "Германия. Оберлига", "links": [{ "sub": "", "url": "https://www.fussball.de/", "note": "" }, { "sub": "", "url": "https://www.fupa.net/region/hamburg/matches", "note": "" }] },
+          { "name": "Чемпионат Белиза", "links": [{ "sub": "", "url": "https://plbd1.com/", "note": "" }, { "sub": "", "url": "https://www.facebook.com/premierleagueofbelize/", "note": "" }] },
+          { "name": "Индия (все чемпионаты)", "links": [{ "sub": "", "url": "https://www.the-aiff.com/", "note": "" }] },
+          { "name": "Украина Премьер-лига", "links": [{ "sub": "", "url": "https://upl.ua/ua", "note": "" }] },
+          { "name": "Иран", "links": [{ "sub": "", "url": "https://iranleague.ir/", "note": "Официальный сайт." }, { "sub": "", "url": "https://www.varzesh3.com/football/league/6/", "note": "Основной, по которому закрываем." }, { "sub": "", "url": "https://www.persianleague.com/", "note": "Дополнительный." }] },
+          { "name": "Саудовская Аравия (все дивизионы)", "links": [{ "sub": "", "url": "https://www.saff.com.sa/en/calendar.php", "note": "В верхней части выбираете дату." }] },
+          { "name": "Ливия", "links": [{ "sub": "", "url": "https://www.ysscores.com/en/championship/784120/Libyan-Premier-League", "note": "Основной сайт" }, { "sub": "", "url": "https://jdwel.com/today/", "note": "Дополнительный сайт" }] },
+          { "name": "Пуэрто-Рико", "links": [{ "sub": "", "url": "https://somosmetrotv.com/lpr/", "note": "" }, { "sub": "", "url": "https://www.instagram.com/ligapuertoricopro/", "note": "" }, { "sub": "", "url": "https://www.youtube.com/@LIGAPUERTORICOPRO/streams", "note": "" }] },
+          { "name": "Сирия", "links": [{ "sub": "", "url": "https://www.facebook.com/riadi.alwehda", "note": "" }] },
+          { "name": "Лаос. Премьер-лига", "links": [{ "sub": "", "url": "https://laoff.org.la/en/competition/pepsi_lao_league_1", "note": "" }, { "sub": "", "url": "https://www.youtube.com/@laofftv2231/streams", "note": "" }] },
+          { "name": "Сербия", "links": [{ "sub": "", "url": "https://srbijasport.net/league/8152-srpska-liga-beograd", "note": "" }, { "sub": "", "url": "https://www.fsb.org.rs/", "note": "" }, { "sub": "", "url": "https://www.youtube.com/@FSBeograda/streams", "note": "" }] },
+          { "name": "Дания (все лиги)", "links": [{ "sub": "", "url": "https://www.dbu.dk/resultater/kampsoegAdvanceret", "note": "" }] },
+          { "name": "Concacaf", "links": [{ "sub": "", "url": "https://sportnewsafrica.com/en/stats.html", "note": "Все Африканские кубки" }, { "sub": "", "url": "https://www.youtube.com/concacaf/streams", "note": "" }, { "sub": "", "url": "https://www.facebook.com/profile.php?id=61559574353775", "note": "" }] },
+          { "name": "Черногория", "links": [{ "sub": "", "url": "https://fscg.me/", "note": "Официальный сайт. Все лиги." }] },
+          { "name": "Нидерланды", "links": [{ "sub": "", "url": "https://www.voetbal.nl/inloggen", "note": "Официальный сайт, требует регистрации." }] },
+          { "name": "Ботсвана", "links": [{ "sub": "", "url": "https://www.facebook.com/bwpremierleague/", "note": "" }] },
+          { "name": "Мадагаскар", "links": [{ "sub": "", "url": "https://www.facebook.com/ProLeaguem/", "note": "" }] },
+          { "name": "Азербайджан 2-я лига", "links": [{ "sub": "", "url": "https://liqa2.pfl.az/", "note": "" }] },
+          { "name": "Армения 1-я лига", "links": [{ "sub": "", "url": "https://www.ffa.am/ru/first-league", "note": "" }] },
+          { "name": "Абхазия", "links": [{ "sub": "", "url": "https://ff-ra.ru/", "note": "" }] },
+          { "name": "Финляндия", "links": [{ "sub": "", "url": "https://tulospalvelu.palloliitto.fi/", "note": "" }] },
+          { "name": "Габон", "links": [{ "sub": "", "url": "https://www.facebook.com/Linaf.net/", "note": "" }] },
+          { "name": "Гвинея", "links": [{ "sub": "", "url": "https://liguepro-gn.com/", "note": "" }, { "sub": "", "url": "https://www.facebook.com/LGFPOfficiel/", "note": "" }] },
+          { "name": "Босния и Герцеговина", "links": [{ "sub": "", "url": "https://www.nsfbih.ba/", "note": "" }] },
+          { "name": "Грузия (лига 3 и 4)", "links": [{ "sub": "", "url": "https://liga.gff.ge/results", "note": "" }] },
+          { "name": "Косово", "links": [{ "sub": "", "url": "https://topsporti.com/rezultatet-futboll-stinori-2025-2026/#", "note": "" }, { "sub": "", "url": "https://topsporti.com/livescore/", "note": "" }] },
+          { "name": "Швеция", "links": [{ "sub": "", "url": "https://fotbollplay.se/samling/matcher", "note": "Могут быть трансляции, вероятность не 100%." }, { "sub": "", "url": "https://www.svenskfotboll.se/serier-cuper/matcher-idag/", "note": "Официальный сайт, все лиги" }] },
+          { "name": "Кот-д'Ивуар", "links": [{ "sub": "", "url": "https://www.facebook.com/profile.php?id=61556221721793", "note": "" }, { "sub": "", "url": "https://www.facebook.com/laligue1civ?locale=fr_FR", "note": "" }] },
+          { "name": "Канада", "links": [{"sub": "Британская Колумбия", "url": "https://bcplsoccer.ca/competition/womens-bc-premier-league/", "note": ""}, {"sub": "Онтарио", "url": "https://oplsoccer.ca/", "note": ""}, {"sub": "Северная суперлига Женщины", "url": "https://www.nsl.ca/", "note": ""}, {"sub": "АПЛ", "url": "https://aplsoccer.ca/", "note": ""}, {"sub": "Прерии", "url": "https://pplsoccer.ca/competition/mens-prairies-premier-league/", "note": ""}, {"sub": "Квебек", "url": "https://www.lsproqc.com/schedule-stats-standings", "note": ""}, {"sub": "Кубок Квебека", "url": "https://page.spordle.com/fr/coupe-du-quebec/schedule-stats-standings", "note": ""}] },
+          { "name": "Антигуа и Барбуда", "links": [{ "sub": "", "url": "https://www.facebook.com/antiguaandbarbudafa/", "note": "" }] },
+          { "name": "Тунис", "links": [{ "sub": "", "url": "https://www.facebook.com/Linaf.net", "note": "" }, { "sub": "", "url": "https://www.facebook.com/diwan.sport.official/", "note": "" }] },
+          { "name": "Швейцария", "links": [{"sub": "Женщины", "url": "https://www.awsl.ch/axa-womens-super-league/meisterschaft.aspx", "note": ""}, {"sub": "ACVF", "url": "https://matchcenter.acvf.ch/", "note": ""}, {"sub": "FVRZ", "url": "https://matchcenter.fvrz.ch/", "note": ""}, {"sub": "OFV", "url": "https://matchcenter.ofv.swiss/", "note": ""}, {"sub": "IFV", "url": "https://matchcenter.ifv.ch/", "note": ""}, {"sub": "FVBJ", "url": "https://www.fvbj-afbj.ch/fussballverband-bern-jura.aspx", "note": ""}, {"sub": "FVNWS", "url": "https://matchcenter.fvnws.ch/", "note": ""}, {"sub": "ACGF", "url": "https://matchcenter.acgf.ch/", "note": ""}, {"sub": "AVF", "url": "https://matchcenter.avf-wfv.ch/", "note": ""}] },
+          { "name": "MPL", "links": [{ "sub": "", "url": "https://mountainpl.com/", "note": "" }] },
+          { "name": "Хорватия", "links": [{ "sub": "", "url": "https://semafor.hns.family/en/competitions/100418001/supersport-second-nl/", "note": "" }] },
+          { "name": "Нигер", "links": [{ "sub": "", "url": "https://www.facebook.com/www.fenifoot.football/", "note": "" }, { "sub": "", "url": "https://www.facebook.com/nigerfoot2/", "note": "" }] },
+          { "name": "Норвегия", "links": [{ "sub": "", "url": "https://www.fotball.no/", "note": "" }] },
+          { "name": "Австрия", "links": [{ "sub": "", "url": "https://www.oefb.at/bewerbe/Bewerb/216439?2-Landesliga", "note": "" }] },
+          { "name": "Тимор", "links": [{ "sub": "", "url": "https://www.facebook.com/ligatimorense/", "note": "" }, { "sub": "", "url": "https://www.facebook.com/fftl.events/", "note": "" }] },
+          { "name": "Боливия 3 дивизион Тариха", "links": [{ "sub": "", "url": "https://www.facebook.com/atftarijaoficial/", "note": "Тут всегда расписывают и дают моменты голов в записи" }, { "sub": "", "url": "https://www.facebook.com/SomosDeporteBolivia", "note": "Доп. вариант" }] },
+          { "name": "USL 2 лига", "links": [{ "sub": "", "url": "https://www.uslleaguetwo.com/league-schedule", "note": "" }, { "sub": "", "url": "https://sportsengineplay.com/leagues/USL-League-Two-205499?viewType=list", "note": "" }] },
+          { "name": "NVSL", "links": [{ "sub": "", "url": "https://nvslsoccer.com/divisions.php", "note": "" }, { "sub": "", "url": "https://www.youtube.com/@nvslsoccer/streams", "note": "Могут дать трансляцию, вероятность не 100%." }] },
+          { "name": "Австралийская лига Квинследа", "links": [{ "sub": "", "url": "https://www.playhq.com/afl/org/afl-queensland-league/afl-queensland-2026/tpil-lawyers-qafl/49bbd477/R14", "note": "" }] },
+          { "name": "Северо-Западная лига Австралийского футбола", "links": [{ "sub": "", "url": "https://www.playhq.com/afl/org/north-west-football-league-of-tasmania-nwfl/north-west-football-league-of-tasmania-2026/nwfl-premier-league-senior-men/c2721398/R10", "note": "" }] },
+          { "name": "Пляжный футбол Италия серия А", "links": [{ "sub": "", "url": "https://www.youtube.com/@legadilettanti/streams", "note": "" }] },
+          { "name": "Парагвай 4-й дивизон", "links": [{ "sub": "", "url": "https://x.com/APFPrimeraC", "note": "" }] },
+          { "name": "Болгария 3-я лига", "links": [{ "sub": "", "url": "https://bulgarian-football.com/yugozapadna-treta-liga.html#k8r5", "note": "" }] },
+          { "name": "Лига чемпионов Сокка 6х6", "links": [{ "sub": "", "url": "https://www.socca-cl.com/schedule/", "note": "" }] },
+          { "name": "Лоуленд лига развития до 20", "links": [{ "sub": "", "url": "https://slfl.co.uk/match-centre/sldfl/2026-2027/", "note": "" }] },
+          { "name": "Чемпионат Чада", "links": [{ "sub": "", "url": "https://www.facebook.com/mediasport235td", "note": "" }, { "sub": "", "url": "https://www.facebook.com/ligueprovincialedefootballdeNdjamena", "note": "" }] },
+          { "name": "Лесото", "links": [{ "sub": "", "url": "https://www.facebook.com/lesothosoccersector/", "note": "" }, { "sub": "", "url": "https://www.facebook.com/profile.php?id=100069524503501", "note": "" }] }
+        ]
+      },
+      {
+        "sport": "Хоккей",
+        "championships": [
+          { "name": "Швейцария", "links": [{ "sub": "", "url": "https://www.sihf.ch/de/game-center/", "note": "" }] },
+          { "name": "Германия", "links": [{ "sub": "", "url": "https://deb-online.live/", "note": "" }] },
+          { "name": "Бельгия", "links": [{ "sub": "", "url": "https://www.rbihf.be/", "note": "" }] },
+          { "name": "SPHL", "links": [{ "sub": "", "url": "https://www.thesphl.com/", "note": "" }] },
+          { "name": "LNAH", "links": [{ "sub": "", "url": "https://www.lnah.com/fr/index.html", "note": "" }] },
+          { "name": "RFEDH - Чемпионат Испании", "links": [{ "sub": "", "url": "https://www.hockey.fedhielo.com/", "note": "" }] },
+          { "name": "FPHL", "links": [{ "sub": "", "url": "https://www.federalhockey.com/", "note": "" }] },
+          { "name": "Финляндия 3-я лига", "links": [{ "sub": "", "url": "https://tulospalvelu.leijonat.fi/", "note": "" }] },
+          { "name": "Чехия", "links": [{ "sub": "", "url": "https://www.hokej.cz/druha-liga", "note": "" }] },
+          { "name": "UAHL", "links": [{ "sub": "", "url": "https://theuahl.com/", "note": "Необходима регистрация на сайте, бесплатная, делается в 2 клика" }] },
+          { "name": "Хоккей на траве. Ирландия", "links": [{ "sub": "", "url": "https://websites.mygameday.app/comp_info.cgi?a=ROUND&round=15&client=0-12729-0-653933-0&pool=1", "note": "" }] },
+          { "name": "ECHL", "links": [{ "sub": "", "url": "https://echl.com/", "note": "" }] },
+          { "name": "КХЛ", "links": [{ "sub": "", "url": "https://www.khl.ru/", "note": "" }] },
+          { "name": "МХЛ", "links": [{ "sub": "", "url": "https://mhl.khl.ru/", "note": "" }] }
+        ]
+      },
+      {
+        "sport": "Гандбол",
+        "championships": [
+          { "name": "Эстония", "links": [{ "sub": "", "url": "https://kasipall.ee/", "note": "" }] },
+          { "name": "Люксембург АХА", "links": [{ "sub": "", "url": "https://www.flh.lu/championnat/rencontres-weekend-semaine-courante#/schedule", "note": "" }] },
+          { "name": "Иран", "links": [{ "sub": "", "url": "https://irihf.ir/", "note": "" }, { "sub": "", "url": "https://t.me/s/irihf", "note": "" }] },
+          { "name": "Бельгия", "links": [{ "sub": "", "url": "https://www.clubee.com/handballbelgium/first-division-m--982001v4/leagues/18702/seasons/220", "note": "" }] }
+        ]
+      },
+      {
+        "sport": "Футзал",
+        "championships": [
+          { "name": "Бельгия", "links": [{ "sub": "", "url": "https://www.ffa.be/competitions-0/resultats-et-calendriers", "note": "Основной источник. Можно искать и футбол. Подсказка: Внизу страницы в графе: Футзал -> Nationale -> Championat -> Division Elite 1e -> Calendrier" }, { "sub": "", "url": "http://www.futsalbelgium.com/season/results.asp?comp=national_results&division=1", "note": "Доп. источник" }] },
+          { "name": "Финляндия", "links": [{ "sub": "", "url": "https://tulospalvelu.palloliitto.fi/livescore/today/all", "note": "" }] },
+          { "name": "Дания", "links": [{ "sub": "", "url": "https://www.dbu.dk/resultater/pulje/476135/kampprogramFuld", "note": "" }] },
+          { "name": "Польша", "links": [{ "sub": "", "url": "https://www.futsalekstraklasa.pl/", "note": "" }, { "sub": "", "url": "https://www.futsal-polska.pl/", "note": "" }, { "sub": "", "url": "https://www.youtube.com/@futsalekstraklasaofficial/streams", "note": "" }] },
+          { "name": "Бразилия", "links": [{ "sub": "", "url": "https://ligafemininadefutsal.com.br/#tabela", "note": "" }, { "sub": "", "url": "http://cbfs.com.br/site/index.asp", "note": "" }, { "sub": "Серебряная серия", "url": "https://www.youtube.com/@ligafemininadefutsal/streams", "note": "" }, { "sub": "Серебряная серия", "url": "https://www.futsalparana.com.br/Editorias/59/Tabelas", "note": "" }] },
+          { "name": "Япония Ф-лига 2-й дивизион", "links": [{ "sub": "", "url": "https://www.fleague.jp/score2/", "note": "" }] }
+        ]
+      },
+      {
+        "sport": "Баскетбол",
+        "championships": [
+          { "name": "NBA G-лига", "links": [{ "sub": "", "url": "https://gleague.nba.com/", "note": "" }] },
+          { "name": "Люксембург", "links": [{ "sub": "", "url": "https://www.luxembourg.basketball/c/calendrier-resultat/110/total-league-hommes/", "note": "" }] },
+          { "name": "Ирландия", "links": [{ "sub": "", "url": "https://ireland.basketball/MensSuperLeagueFixtures#", "note": "" }] },
+          { "name": "Хорватия 1-я лига", "links": [{ "sub": "", "url": "https://www.hks-cbf.hr/prva-muska-liga/", "note": "" }] },
+          { "name": "Германия. Женщины", "links": [{ "sub": "", "url": "https://toyota-dbbl.de/", "note": "" }] },
+          { "name": "Азербайджан", "links": [{ "sub": "", "url": "https://aze.basketball/SuperLeague", "note": "" }] },
+          { "name": "Косово", "links": [{ "sub": "", "url": "https://www.basketbolli.com/", "note": "" }] },
+          { "name": "Северная Македония", "links": [{ "sub": "", "url": "https://woman.mkd.basketball/championship/prva-liga-zeni/results", "note": "" }] },
+          { "name": "ECBL", "links": [{ "sub": "", "url": "https://www.eastcoastbasketballleague.org/teams/default.asp?u=EASTCOASTBASKETBALLLEAGUE2015&s=basketball&p=schedule", "note": "" }] },
+          { "name": "Беларусь", "links": [{ "sub": "", "url": "https://belarus.russiabasket.ru/games/1062388?apiUrl=https%3A%2F%2Forg.infobasket.su", "note": "" }, { "sub": "", "url": "https://www.youtube.com/@sport-tvsporttv5727/streams", "note": "" }] },
+          { "name": "Черногория", "links": [{ "sub": "", "url": "https://www.kscg.me/", "note": "" }] },
+          { "name": "Грузия U22", "links": [{ "sub": "", "url": "http://gbf.ge/en/league/u22", "note": "" }] },
+          { "name": "Казахстан", "links": [{ "sub": "", "url": "https://nbfkz.com/ru/tournaments/?category_tournament=schedule&season=37&tournament_type=1&tournament=450", "note": "" }] },
+          { "name": "TBL", "links": [{ "sub": "", "url": "https://thebasketballleague.net/", "note": "" }] },
+          { "name": "CEBL Канада", "links": [{ "sub": "", "url": "https://www.cebl.ca/", "note": "" }] },
+          { "name": "CIBACOPA", "links": [{ "sub": "", "url": "https://cibacopa.mx/calendario/", "note": "" }] },
+          { "name": "Франция Женщины 2-я лига", "links": [{ "sub": "", "url": "https://lf2.ffbb.com/saison-reguliere-lf2", "note": "" }] },
+          { "name": "Сербия", "links": [{ "sub": "", "url": "https://lige.kss.rs/seniori/2-muska-liga/tabela-i-delegiranja/", "note": "" }, { "sub": "", "url": "https://www.youtube.com/@DIGITALScoreTV/streams", "note": "" }] }
+        ]
+      },
+      {
+        "sport": "Волейбол",
+        "championships": [
+          { "name": "Экваволи 3х3", "links": [{ "sub": "", "url": "https://www.facebook.com/ecua.cup/?locale=es_LA", "note": "" }, { "sub": "", "url": "https://www.youtube.com/@ZappingEC/streams", "note": "" }] }
+        ]
+      },
+      {
+        "sport": "Флорбол",
+        "championships": [
+          { "name": "Финляндия", "links": [{ "sub": "", "url": "https://tulospalvelu.salibandy.fi/livescore/today/all", "note": "" }] },
+          { "name": "Латвия", "links": [{ "sub": "", "url": "https://www.floorball.lv/lv/2025/chempionats/sv/kalendars", "note": "" }] },
+          { "name": "Польша", "links": [{ "sub": "", "url": "https://www.polskiunihokej.pl/component/joomsport/calendar/720", "note": "" }] }
+        ]
+      },
+      {
+        "sport": "Регби",
+        "championships": [
+          { "name": "Шотландия", "links": [{ "sub": "", "url": "https://fixtures.scottishrugby.org/club-rugby/2025-2026/3876?tab=results", "note": "" }] },
+          { "name": "Ирландия", "links": [{ "sub": "", "url": "https://www.irishrugby.ie/fixture/result/91", "note": "" }, { "sub": "", "url": "https://www.finalwhistle.ie/rugby/match-centre/", "note": "" }] },
+          { "name": "Премьершип Квинслед", "links": [{ "sub": "", "url": "https://www.qrl.com.au/draw/?competition=179&round=14&season=2026", "note": "" }] },
+          { "name": "Другие страны", "links": [{ "sub": "", "url": "http://www.rugbyarchive.net/fixres", "note": "" }] }
+        ]
+      },
+      {
+        "sport": "Водное поло",
+        "championships": [
+          { "name": "Испания", "links": [{ "sub": "", "url": "https://wp.rfen.es/es/tournaments", "note": "" }] },
+          { "name": "Франция", "links": [{ "sub": "", "url": "https://waterpolo.ffnatation.fr/fr/tournaments", "note": "" }] }
+        ]
+      },
+      {
+        "sport": "Американский футбол",
+        "championships": [
+          { "name": "Франция FFFA", "links": [{ "sub": "", "url": "https://www.fffa.org/football-americain/championnat-elite/", "note": "" }] }
+        ]
+      },
+      {
+        "sport": "Бейсбол",
+        "championships": [
+          { "name": "Япония KBO", "links": [{ "sub": "", "url": "https://www.koreabaseball.com/Futures/Schedule/GameList.aspx", "note": "" }] },
+          { "name": "Никарагуа", "links": [{ "sub": "", "url": "https://gpo.wbsc.org/es/events/2026-campeonato-germn-pomares-ordoez-2026/schedule-and-results", "note": "" }] },
+          { "name": "Россия", "links": [{ "sub": "", "url": "https://baseballrussia.ru/?p=17046", "note": "" }] },
+          { "name": "Чехия", "links": [{ "sub": "", "url": "https://www.baseball.cz/competition/detail/1?season=21", "note": "" }] },
+          { "name": "Куба", "links": [{ "sub": "", "url": "https://www.beisbolcubano.cu/default", "note": "" }] },
+          { "name": "Венесуэла", "links": [{ "sub": "", "url": "https://www.lmbp.net/calendario", "note": "" }, { "sub": "", "url": "https://stats.lvbp.com/resultados.php", "note": "" }] },
+          { "name": "Австрия", "links": [{ "sub": "", "url": "https://www.baseballsoftball.at/en/events/baseball-bundesliga-2026/schedule-and-results", "note": "" }] }
+        ]
+      },
+      {
+        "sport": "Прочие виды спорта",
+        "championships": [
+          { "name": "Спидвэй", "links": [{ "sub": "", "url": "https://britishspeedway.co.uk/league/championship/", "note": "" }] },
+          { "name": "Текбол", "links": [{ "sub": "", "url": "https://www.fiteq.org/events/international", "note": "" }] },
+          { "name": "Корфбол", "links": [{ "sub": "", "url": "https://worldkorfball.sport/matches/", "note": "" }] }
+        ]
+      },
+      {
+        "sport": "Другие полезные ссылки",
+        "hideTournamentCount": true,
+        "championships": [
+          { "name": "Болгарские трансляции", "links": [{ "sub": "", "url": "https://sportbg.bg/", "note": "" }] },
+          { "name": "Флэшскор", "links": [{ "sub": "", "url": "https://www.flashscore.com.ua/", "note": "" }] },
+          { "name": "Товарные матчи", "links": [{ "sub": "", "url": "https://vglive.vg.no/turnering/treningskamper/105/kamper", "note": "Доп. ссылка для сравнения футбольных матчей" }] }
+        ]
+      }
+    ];
+
+    /**
+     * Иконки для всех 13 разделов (при добавлении нового спорта подставится стандартная иконка 🏆)
+     */
+    const SPORT_ICONS = {
+      "Футбол": "⚽",
+      "Хоккей": "🏒",
+      "Гандбол": "🤾",
+      "Футзал": "🥅",
+      "Баскетбол": "🏀",
+      "Волейбол": "🏐",
+      "Флорбол": "🏑",
+      "Регби": "🏉",
+      "Водное поло": "🤽",
+      "Американский футбол": "🏈",
+      "Бейсбол": "⚾",
+      "Прочие виды спорта": "🏅",
+      "Другие полезные ссылки": "🔗"
+    };
+
+    function getSportIcon(sportName) {
+      return SPORT_ICONS[sportName] || "🏆";
+    }
+
+    /**
+     * Склонение слова "турнир" (1 турнир, 2 турнира, 5 турниров)
+     */
+    function pluralizeChamps(count) {
+      const mod10 = count % 10;
+      const mod100 = count % 100;
+      if (mod10 === 1 && mod100 !== 11) return `${count} турнир`;
+      if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return `${count} турнира`;
+      return `${count} турниров`;
+    }
+
+    /**
+     * Склонение слова "ссылка" (1 ссылка, 2 ссылки, 5 ссылок)
+     */
+    function pluralizeLinks(count) {
+      const mod10 = count % 10;
+      const mod100 = count % 100;
+      if (mod10 === 1 && mod100 !== 11) return `${count} ссылка`;
+      if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return `${count} ссылки`;
+      return `${count} ссылок`;
+    }
+
+    /**
+     * Склонение слова "раздел" (1 раздел, 2 раздела, 5 разделов)
+     */
+    function pluralizeSections(count) {
+      const mod10 = count % 10;
+      const mod100 = count % 100;
+      if (mod10 === 1 && mod100 !== 11) return `${count} раздел`;
+      if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return `${count} раздела`;
+      return `${count} разделов`;
+    }
+
+    /**
+     * Извлечение аккуратного домена/метки из длинного URL для отображения на кнопке
+     */
+    function formatLinkLabel(url) {
+      try {
+        const parsed = new URL(url);
+        let host = parsed.hostname.replace(/^www\./, '');
+        if (host === 'youtube.com') return 'YouTube трансляции / канал';
+        if (host === 'facebook.com') return 'Facebook страница';
+        if (host === 'instagram.com') return 'Instagram страница';
+        if (host === 'x.com' || host === 'twitter.com') return 'X (Twitter)';
+        if (host === 't.me') return 'Telegram канал';
+        return host;
+      } catch (e) {
+        return url;
+      }
+    }
+
+    /**
+     * Экранирование HTML для безопасного вывода текста
+     */
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    /**
+     * Рендер списка ссылок и примечаний для одного чемпионата (правая колонка)
+     */
+    function renderLinksColumn(links) {
+      return links.map(item => {
+        const domainLabel = formatLinkLabel(item.url);
+        const subBadge = item.sub
+          ? `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200/70 mr-2">${escapeHtml(item.sub)}</span>`
+          : '';
+
+        // Выделяем важные подсказки цветом, если в тексте есть ключевые слова
+        let noteHtml = '';
+        if (item.note) {
+          const isPrimary = /основн/i.test(item.note);
+          const isWarning = /регистрац|вероятность/i.test(item.note);
+          let noteClasses = 'bg-slate-100 text-slate-600 border-slate-200';
+          if (isPrimary) noteClasses = 'bg-emerald-50 text-emerald-800 border-emerald-200';
+          else if (isWarning) noteClasses = 'bg-amber-50 text-amber-800 border-amber-200';
+
+          noteHtml = `
+            <div class="mt-1.5 text-xs px-2.5 py-1.5 rounded-lg border ${noteClasses} leading-relaxed">
+              ${escapeHtml(item.note)}
+            </div>
+          `;
+        }
+
+        return `
+          <div class="py-1.5 first:pt-0 last:pb-0">
+            <div class="flex flex-wrap items-center gap-y-1">
+              ${subBadge}
+              <a
+                href="${escapeHtml(item.url)}"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline break-all group"
+              >
+                <span>${escapeHtml(domainLabel)}</span>
+                <svg class="w-3.5 h-3.5 text-blue-400 group-hover:text-blue-600 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"></path>
+                </svg>
+              </a>
+            </div>
+            <div class="text-[11px] text-slate-400 truncate max-w-md mt-0.5" title="${escapeHtml(item.url)}">
+              ${escapeHtml(item.url)}
+            </div>
+            ${noteHtml}
+          </div>
+        `;
+      }).join('');
+    }
+
+    // =====================================================================
+    // ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ И НАВИГАЦИЯ В ПАМЯТИ (БЕЗ HASH / PUSHSTATE)
+    // =====================================================================
+    function initApp() {
+      try {
+        // Элементы интерфейса
+        const homeView = document.getElementById('home-view');
+        const sportDetailView = document.getElementById('sport-view');
+        const sportsGrid = document.getElementById('sportsGrid');
+        const totalStatsBadge = document.getElementById('totalStatsBadge');
+        const headerSummaryBadge = document.getElementById('headerSummaryBadge');
+
+        // Инструкция
+        const toggleGuideBtn = document.getElementById('toggleGuideBtn');
+        const guidePanel = document.getElementById('guidePanel');
+
+        // Глобальный поиск
+        const globalSearchInput = document.getElementById('globalSearchInput');
+        const clearGlobalSearchBtn = document.getElementById('clearGlobalSearchBtn');
+        const resetSearchLink = document.getElementById('resetSearchLink');
+        const globalSearchResultsContainer = document.getElementById('globalSearchResultsContainer');
+        const globalSearchResultsList = document.getElementById('globalSearchResultsList');
+        const globalSearchCount = document.getElementById('globalSearchCount');
+        const sportsGridContainer = document.getElementById('sportsGridContainer');
+
+        // Страница конкретного вида спорта
+        const sportDetailIcon = document.getElementById('sportDetailIcon');
+        const sportDetailTitle = document.getElementById('sportDetailTitle');
+        const sportDetailCount = document.getElementById('sportDetailCount');
+        const localSearchInput = document.getElementById('localSearchInput');
+        const clearLocalSearchBtn = document.getElementById('clearLocalSearchBtn');
+        const championshipsList = document.getElementById('championshipsList');
+        const localEmptyState = document.getElementById('localEmptyState');
+
+        let currentView = 'home';
+        let activeSportIndex = null;
+
+        // 1. Логика кнопки "Как пользоваться"
+        function toggleGuide(forceState) {
+          if (!guidePanel || !toggleGuideBtn) return;
+          const isCurrentlyHidden = guidePanel.classList.contains('hidden');
+          const shouldShow = typeof forceState === 'boolean' ? forceState : isCurrentlyHidden;
+          guidePanel.classList.toggle('hidden', !shouldShow);
+          toggleGuideBtn.setAttribute('aria-expanded', String(shouldShow));
+        }
+        window.appToggleGuide = toggleGuide;
+
+        // 2. Переключение экранов исключительно в памяти (без location.hash и history.pushState)
+        function openSportView(idx) {
+          const sportIndex = Number(idx);
+          if (Number.isNaN(sportIndex) || !SPORTS_DATA[sportIndex]) return;
+
+          currentView = 'sport';
+          activeSportIndex = sportIndex;
+          homeView.classList.add('hidden');
+          homeView.style.display = 'none';
+
+          sportDetailView.classList.remove('hidden');
+          sportDetailView.style.display = 'block';
+
+          if (localSearchInput) localSearchInput.value = '';
+          renderSportDetail(sportIndex, '');
+
+          try {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          } catch (_) {
+            window.scrollTo(0, 0);
+          }
+        }
+
+        function navigateHome() {
+          currentView = 'home';
+          activeSportIndex = null;
+          sportDetailView.classList.add('hidden');
+          sportDetailView.style.display = 'none';
+
+          homeView.classList.remove('hidden');
+          homeView.style.display = 'block';
+
+          try {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          } catch (_) {
+            window.scrollTo(0, 0);
+          }
+        }
+
+        window.appOpenSport = openSportView;
+        window.appNavigateHome = navigateHome;
+
+        // 3. Построение карточек видов спорта на главной странице
+        function renderHomeGrid() {
+          let totalChamps = 0;
+          let totalLinks = 0;
+          sportsGrid.innerHTML = SPORTS_DATA.map((item, idx) => {
+            const count = item.championships.length;
+            const linksCount = item.championships.reduce((acc, c) => acc + c.links.length, 0);
+            totalChamps += count;
+            totalLinks += linksCount;
+            const subtitleText = item.hideTournamentCount
+              ? pluralizeLinks(linksCount)
+              : `${pluralizeChamps(count)} &bull; ${pluralizeLinks(linksCount)}`;
+            return `
+              <button
+                type="button"
+                data-sport-index="${idx}"
+                onclick="window.appOpenSport(${idx})"
+                class="sport-card-btn w-full text-left group bg-white p-5 rounded-2xl border border-slate-200 hover:border-blue-400 hover:shadow-md transition-all flex items-center justify-between gap-4 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <div class="flex items-center gap-4 pointer-events-none">
+                  <div class="w-12 h-12 rounded-xl bg-slate-100 group-hover:bg-blue-50 flex items-center justify-center text-2xl transition-colors shrink-0">
+                    ${getSportIcon(item.sport)}
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-slate-900 group-hover:text-blue-600 transition-colors text-base sm:text-lg leading-snug">
+                      ${escapeHtml(item.sport)}
+                    </h3>
+                    <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
+                      ${subtitleText}
+                    </p>
+                  </div>
+                </div>
+                <div class="w-8 h-8 rounded-full bg-slate-50 group-hover:bg-blue-600 group-hover:text-white text-slate-400 flex items-center justify-center transition-colors shrink-0 pointer-events-none">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path>
+                  </svg>
+                </div>
+              </button>
+            `;
+          }).join('');
+
+          const summaryText = `${pluralizeSections(SPORTS_DATA.length)} • ${pluralizeChamps(totalChamps)} • ${pluralizeLinks(totalLinks)}`;
+          if (totalStatsBadge) totalStatsBadge.textContent = summaryText;
+          if (headerSummaryBadge) headerSummaryBadge.textContent = summaryText;
+        }
+
+        // Делегирование кликов по сетке видов спорта (страховка на случай клика по любой области карточки)
+        sportsGrid.addEventListener('click', (event) => {
+          const card = event.target.closest('[data-sport-index]');
+          if (card) {
+            event.preventDefault();
+            openSportView(card.getAttribute('data-sport-index'));
+          }
+        });
+
+        // 4. Глобальный сквозной поиск по всем видам спорта
+        function handleGlobalSearch() {
+          const query = globalSearchInput.value.trim().toLowerCase();
+          clearGlobalSearchBtn.classList.toggle('hidden', query.length === 0);
+
+          if (!query) {
+            globalSearchResultsContainer.classList.add('hidden');
+            sportsGridContainer.classList.remove('hidden');
+            return;
+          }
+
+          sportsGridContainer.classList.add('hidden');
+          globalSearchResultsContainer.classList.remove('hidden');
+
+          const matches = [];
+          SPORTS_DATA.forEach((sportObj, sportIdx) => {
+            sportObj.championships.forEach(champ => {
+              const nameMatch = champ.name.toLowerCase().includes(query);
+              const sportMatch = sportObj.sport.toLowerCase().includes(query);
+              const linkMatch = champ.links.some(l =>
+                (l.sub && l.sub.toLowerCase().includes(query)) ||
+                (l.note && l.note.toLowerCase().includes(query)) ||
+                (l.url && l.url.toLowerCase().includes(query))
+              );
+
+              if (nameMatch || sportMatch || linkMatch) {
+                matches.push({
+                  sport: sportObj.sport,
+                  sportIdx,
+                  champ
+                });
+              }
+            });
+          });
+
+          globalSearchCount.textContent = `Найдено результатов: ${matches.length}`;
+
+          if (matches.length === 0) {
+            globalSearchResultsList.innerHTML = `
+              <div class="p-10 text-center text-slate-500 text-sm">
+                По запросу <strong class="text-slate-800">«${escapeHtml(globalSearchInput.value.trim())}»</strong> ничего не найдено. Попробуйте изменить запрос.
+              </div>
+            `;
+            return;
+          }
+
+          globalSearchResultsList.innerHTML = matches.map(m => `
+            <div class="px-4 sm:px-6 py-4 hover:bg-slate-50/80 transition-colors">
+              <div class="grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-6 items-start">
+                <div class="md:col-span-5 space-y-1.5">
+                  <button
+                    type="button"
+                    data-sport-index="${m.sportIdx}"
+                    onclick="window.appOpenSport(${m.sportIdx})"
+                    class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors cursor-pointer"
+                  >
+                    <span>${getSportIcon(m.sport)}</span>
+                    <span>${escapeHtml(m.sport)}</span>
+                  </button>
+                  <div class="font-bold text-slate-900 text-sm sm:text-base">
+                    ${escapeHtml(m.champ.name)}
+                  </div>
+                </div>
+                <div class="md:col-span-7 divide-y divide-slate-100">
+                  ${renderLinksColumn(m.champ.links)}
+                </div>
+              </div>
+            </div>
+          `).join('');
+        }
+
+        // Делегирование кликов по бейджам вида спорта в результатах глобального поиска
+        globalSearchResultsList.addEventListener('click', (event) => {
+          const badge = event.target.closest('[data-sport-index]');
+          if (badge) {
+            event.preventDefault();
+            openSportView(badge.getAttribute('data-sport-index'));
+          }
+        });
+
+        globalSearchInput.addEventListener('input', handleGlobalSearch);
+
+        function clearGlobalSearch() {
+          globalSearchInput.value = '';
+          handleGlobalSearch();
+          globalSearchInput.focus();
+        }
+
+        clearGlobalSearchBtn.addEventListener('click', clearGlobalSearch);
+        resetSearchLink.addEventListener('click', clearGlobalSearch);
+
+        // 5. Отрисовка страницы выбранного вида спорта (2 колонки)
+        function renderSportDetail(sportIdx, filterQuery = '') {
+          const sportObj = SPORTS_DATA[sportIdx];
+          if (!sportObj) {
+            navigateHome();
+            return;
+          }
+
+          activeSportIndex = sportIdx;
+          sportDetailIcon.textContent = getSportIcon(sportObj.sport);
+          sportDetailTitle.textContent = sportObj.sport;
+
+          const q = filterQuery.trim().toLowerCase();
+          clearLocalSearchBtn.classList.toggle('hidden', q.length === 0);
+
+          const filteredChamps = sportObj.championships.filter(champ => {
+            if (!q) return true;
+            const inName = champ.name.toLowerCase().includes(q);
+            const inLinks = champ.links.some(l =>
+              (l.sub && l.sub.toLowerCase().includes(q)) ||
+              (l.note && l.note.toLowerCase().includes(q)) ||
+              (l.url && l.url.toLowerCase().includes(q))
+            );
+            return inName || inLinks;
+          });
+
+          sportDetailCount.textContent = q
+            ? `Показано ${filteredChamps.length} из ${sportObj.championships.length}`
+            : (sportObj.hideTournamentCount ? pluralizeLinks(sportObj.championships.reduce((acc, c) => acc + c.links.length, 0)) : pluralizeChamps(sportObj.championships.length));
+
+          if (filteredChamps.length === 0) {
+            championshipsList.innerHTML = '';
+            localEmptyState.classList.remove('hidden');
+            return;
+          }
+
+          localEmptyState.classList.add('hidden');
+          championshipsList.innerHTML = filteredChamps.map(champ => {
+            const uniqueSubs = [...new Set(champ.links.map(l => l.sub).filter(Boolean))];
+            const subsSummaryHtml = uniqueSubs.length > 0
+              ? `<div class="flex flex-wrap gap-1 mt-1.5">
+                  ${uniqueSubs.map(s => `<span class="text-[11px] px-2 py-0.5 rounded bg-slate-100 text-slate-600">${escapeHtml(s)}</span>`).join('')}
+                 </div>`
+              : '';
+
+            return `
+              <div class="grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-6 px-4 sm:px-6 py-4 hover:bg-slate-50/80 transition-colors items-start">
+                <!-- Левая колонка: Название чемпионата / страны -->
+                <div class="md:col-span-5">
+                  <div class="font-semibold text-slate-900 text-sm sm:text-base">
+                    ${escapeHtml(champ.name)}
+                  </div>
+                  ${subsSummaryHtml}
+                </div>
+
+                <!-- Правая колонка: Кликабельные ссылки и примечания -->
+                <div class="md:col-span-7 divide-y divide-slate-100">
+                  ${renderLinksColumn(champ.links)}
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+
+        localSearchInput.addEventListener('input', () => {
+          if (activeSportIndex !== null) {
+            renderSportDetail(activeSportIndex, localSearchInput.value);
+          }
+        });
+
+        clearLocalSearchBtn.addEventListener('click', () => {
+          localSearchInput.value = '';
+          if (activeSportIndex !== null) {
+            renderSportDetail(activeSportIndex, '');
+          }
+          localSearchInput.focus();
+        });
+
+        // Первичный запуск
+        renderHomeGrid();
+        navigateHome();
+      } catch (err) {
+        console.error('Ошибка инициализации справочника:', err);
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initApp);
+    } else {
+      initApp();
+    }
+  </script>
+</body>
+</html>
