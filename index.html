@@ -47,11 +47,28 @@
       </button>
 
       <!-- Кнопки управления в шапке -->
-      <div class="flex items-center gap-2">
+      <div class="flex flex-wrap items-center gap-2">
+        <!-- Кнопка входа для гостей -->
         <button
           type="button"
+          id="editorLoginBtn"
+          onclick="window.appOpenLoginModal && window.appOpenLoginModal()"
+          class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer shrink-0"
+          title="Вход по ключу доступа для добавления ссылок"
+        >
+          <svg class="w-4 h-4 text-slate-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M7 11V7a5 5 0 0110 0v4"></path>
+          </svg>
+          <span>Вход для редакторов</span>
+        </button>
+
+        <!-- Кнопка добавления ссылки (видна только авторизованным редакторам) -->
+        <button
+          type="button"
+          id="headerAddLinkBtn"
           onclick="window.appOpenAddModal && window.appOpenAddModal()"
-          class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer shrink-0"
+          class="hidden inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer shrink-0"
         >
           <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
@@ -59,6 +76,20 @@
           <span>Добавить ссылку</span>
         </button>
 
+        <!-- Бейдж активного редактора с кнопкой выхода -->
+        <div id="editorBadgeBox" class="hidden inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-medium text-emerald-800">
+          <span id="editorNameLabel">Редактор</span>
+          <button
+            type="button"
+            onclick="window.appLogoutEditor && window.appLogoutEditor()"
+            class="text-emerald-600 hover:text-emerald-900 underline cursor-pointer ml-1"
+            title="Выйти из режима редактора"
+          >
+            Выйти
+          </button>
+        </div>
+
+        <!-- Инструкция -->
         <button
           type="button"
           id="toggleGuideBtn"
@@ -80,7 +111,7 @@
       <div class="max-w-5xl mx-auto px-4 sm:px-6 py-4 text-sm text-slate-700">
         <div class="flex items-start justify-between gap-4">
           <p class="leading-relaxed text-slate-700">
-            Выберите нужный вид спорта из списка ниже или введите название страны, лиги или примечания в строку поиска. Чтобы пополнить базу, нажмите <strong>«Добавить ссылку»</strong> — новая запись сразу появится в справочнике для всех пользователей.
+            Выберите нужный вид спорта из списка ниже или введите название страны, лиги или примечания в строку поиска. Нажмите на любую ссылку справа от чемпионата, чтобы открыть источник в новой вкладке.
           </p>
           <button
             type="button"
@@ -175,8 +206,9 @@
           <span id="sportDetailCount" class="text-xs font-medium text-slate-500"></span>
           <button
             type="button"
+            id="sectionAddLinkBtn"
             onclick="window.appOpenAddModal && window.appOpenAddModal(true)"
-            class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition-colors cursor-pointer"
+            class="hidden inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition-colors cursor-pointer"
           >
             <span>+ Добавить сюда</span>
           </button>
@@ -230,6 +262,47 @@
     </section>
 
   </main>
+
+  <!-- МОДАЛЬНОЕ ОКНО ВХОДА ДЛЯ РЕДАКТОРОВ -->
+  <div id="loginModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-sm w-full overflow-hidden fade-in">
+      <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/70">
+        <h3 class="text-base font-bold text-slate-900">Вход для редакторов</h3>
+        <button type="button" onclick="window.appCloseLoginModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-200/70 cursor-pointer">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <form id="editorLoginForm" class="p-6 space-y-4">
+        <div>
+          <label for="editorKeyInput" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
+            Ключ доступа
+          </label>
+          <input
+            type="password"
+            id="editorKeyInput"
+            required
+            placeholder="Введите выданный вам ключ..."
+            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+          <p class="text-[11px] text-slate-400 mt-1.5">Обычным посетителям вход не требуется — просмотр и поиск открыты для всех.</p>
+        </div>
+
+        <div id="loginStatusMsg" class="hidden text-xs px-3 py-2 rounded-lg"></div>
+
+        <div class="pt-2 flex items-center justify-end gap-2 border-t border-slate-100">
+          <button type="button" onclick="window.appCloseLoginModal()" class="px-4 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 cursor-pointer">
+            Отмена
+          </button>
+          <button type="submit" id="loginSubmitBtn" class="px-5 py-2 rounded-xl text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-colors cursor-pointer">
+            Войти
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <!-- МОДАЛЬНОЕ ОКНО ДОБАВЛЕНИЯ ССЫЛКИ -->
   <div id="addLinkModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
@@ -339,10 +412,8 @@
   </footer>
 
   <script>
-    // =====================================================================
-    // ВСТАВЬТЕ СЮДА ССЫЛКУ НА ВАШЕ ВЕБ-ПРИЛОЖЕНИЕ GOOGLE APPS SCRIPT
-    // =====================================================================
     const API_URL = 'https://script.google.com/macros/s/AKfycbxviCVTZIOEetY5R90w8VfYcGtkqA7h4K1TqoGKKLdhFOvq7nP5fMitOCvEyvyAuKL_7g/exec';
+    const STORAGE_AUTH_KEY = 'rl_editor_auth_v1';
 
     const SPORTS_DATA = [
       {
@@ -599,6 +670,31 @@
         .replace(/'/g, '&#039;');
     }
 
+    // Нормализация URL для точной проверки дубликатов
+    function normalizeUrl(rawUrl) {
+      return String(rawUrl || '')
+        .trim()
+        .toLowerCase()
+        .replace(/^https?:\/\//, '')
+        .replace(/^www\./, '')
+        .replace(/\/+$/, '');
+    }
+
+    // Поиск дубликата ссылки по всей базе справочника
+    function findDuplicateLink(url) {
+      const target = normalizeUrl(url);
+      if (!target) return null;
+      for (const sportObj of SPORTS_DATA) {
+        for (const champ of sportObj.championships) {
+          const found = champ.links.find(l => normalizeUrl(l.url) === target);
+          if (found) {
+            return { sport: sportObj.sport, champ: champ.name };
+          }
+        }
+      }
+      return null;
+    }
+
     function renderLinksColumn(links) {
       return links.map(item => {
         const domainLabel = formatLinkLabel(item.url);
@@ -668,7 +764,8 @@
         sportObj.championships.push(champObj);
       }
 
-      const alreadyExists = champObj.links.some(l => l.url.toLowerCase() === url.toLowerCase());
+      const targetNorm = normalizeUrl(url);
+      const alreadyExists = champObj.links.some(l => normalizeUrl(l.url) === targetNorm);
       if (!alreadyExists) {
         champObj.links.push({ sub: subName, url: url, note: note });
       }
@@ -701,7 +798,20 @@
         const championshipsList = document.getElementById('championshipsList');
         const localEmptyState = document.getElementById('localEmptyState');
 
-        // Элементы модального окна
+        // Элементы авторизации редактора
+        const editorLoginBtn = document.getElementById('editorLoginBtn');
+        const headerAddLinkBtn = document.getElementById('headerAddLinkBtn');
+        const sectionAddLinkBtn = document.getElementById('sectionAddLinkBtn');
+        const editorBadgeBox = document.getElementById('editorBadgeBox');
+        const editorNameLabel = document.getElementById('editorNameLabel');
+
+        const loginModal = document.getElementById('loginModal');
+        const editorLoginForm = document.getElementById('editorLoginForm');
+        const editorKeyInput = document.getElementById('editorKeyInput');
+        const loginSubmitBtn = document.getElementById('loginSubmitBtn');
+        const loginStatusMsg = document.getElementById('loginStatusMsg');
+
+        // Элементы модального окна добавления ссылки
         const addLinkModal = document.getElementById('addLinkModal');
         const addLinkForm = document.getElementById('addLinkForm');
         const modalSportSelect = document.getElementById('modalSportSelect');
@@ -717,14 +827,106 @@
 
         let currentView = 'home';
         let activeSportIndex = null;
+        let currentEditor = null; // { name, key }
 
         function showToast(text) {
           toastNotification.textContent = text;
           toastNotification.classList.remove('hidden');
           setTimeout(() => {
             toastNotification.classList.add('hidden');
-          }, 3500);
+          }, 3800);
         }
+
+        // Обновление видимости кнопок в зависимости от статуса редактора
+        function syncAuthUI() {
+          const isEditor = Boolean(currentEditor && currentEditor.key);
+          editorLoginBtn.classList.toggle('hidden', isEditor);
+          headerAddLinkBtn.classList.toggle('hidden', !isEditor);
+          sectionAddLinkBtn.classList.toggle('hidden', !isEditor);
+          editorBadgeBox.classList.toggle('hidden', !isEditor);
+          if (isEditor) {
+            editorNameLabel.textContent = `Редактор: ${currentEditor.name}`;
+          }
+        }
+
+        // Восстановление сессии редактора из localStorage
+        function restoreEditorSession() {
+          try {
+            const raw = localStorage.getItem(STORAGE_AUTH_KEY);
+            if (raw) {
+              const parsed = JSON.parse(raw);
+              if (parsed && parsed.key && parsed.name) {
+                currentEditor = parsed;
+              }
+            }
+          } catch (_) {}
+          syncAuthUI();
+        }
+
+        window.appOpenLoginModal = function() {
+          editorLoginForm.reset();
+          loginStatusMsg.classList.add('hidden');
+          loginModal.classList.remove('hidden');
+          setTimeout(() => editorKeyInput.focus(), 50);
+        };
+
+        window.appCloseLoginModal = function() {
+          loginModal.classList.add('hidden');
+        };
+
+        loginModal.addEventListener('click', (e) => {
+          if (e.target === loginModal) window.appCloseLoginModal();
+        });
+
+        window.appLogoutEditor = function() {
+          currentEditor = null;
+          try {
+            localStorage.removeItem(STORAGE_AUTH_KEY);
+          } catch (_) {}
+          syncAuthUI();
+          showToast('Вы вышли из режима редактора.');
+        };
+
+        // Проверка ключа редактора через Google Apps Script
+        editorLoginForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const key = editorKeyInput.value.trim();
+          if (!key) return;
+
+          loginSubmitBtn.disabled = true;
+          loginSubmitBtn.textContent = 'Проверка...';
+          loginStatusMsg.classList.add('hidden');
+
+          try {
+            const res = await fetch(API_URL, {
+              method: 'POST',
+              headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+              body: JSON.stringify({ action: 'login', key })
+            });
+            const result = await res.json();
+
+            if (result && result.status === 'ok') {
+              currentEditor = { name: result.editor || 'Редактор', key };
+              try {
+                localStorage.setItem(STORAGE_AUTH_KEY, JSON.stringify(currentEditor));
+              } catch (_) {}
+              syncAuthUI();
+              window.appCloseLoginModal();
+              showToast(`Добро пожаловать, ${currentEditor.name}!`);
+            } else {
+              loginStatusMsg.textContent = 'Неверный ключ доступа. Проверьте раскладку или обратитесь к администратору.';
+              loginStatusMsg.className = 'text-xs px-3 py-2 rounded-lg bg-rose-50 text-rose-700 border border-rose-200';
+              loginStatusMsg.classList.remove('hidden');
+            }
+          } catch (err) {
+            loginStatusMsg.textContent = 'Ошибка соединения с сервером. Попробуйте ещё раз.';
+            loginStatusMsg.className = 'text-xs px-3 py-2 rounded-lg bg-rose-50 text-rose-700 border border-rose-200';
+            loginStatusMsg.classList.remove('hidden');
+          } finally {
+            loginSubmitBtn.disabled = false;
+            loginSubmitBtn.textContent = 'Войти';
+          }
+        });
 
         function refreshCurrentUI() {
           renderHomeGrid();
@@ -751,7 +953,7 @@
           }
         }
 
-        // Управление модальным окном
+        // Управление модальным окном добавления ссылки
         function updateChampDatalist() {
           const selectedSport = modalSportSelect.value;
           const sportObj = SPORTS_DATA.find(s => s.sport === selectedSport);
@@ -772,6 +974,11 @@
         });
 
         window.appOpenAddModal = function(preselectCurrentSport = false) {
+          if (!currentEditor || !currentEditor.key) {
+            window.appOpenLoginModal();
+            return;
+          }
+
           addLinkForm.reset();
           modalStatusMsg.classList.add('hidden');
           modalNewSportInput.classList.add('hidden');
@@ -800,11 +1007,18 @@
         addLinkForm.addEventListener('submit', async (e) => {
           e.preventDefault();
 
+          if (!currentEditor || !currentEditor.key) {
+            window.appCloseAddModal();
+            window.appOpenLoginModal();
+            return;
+          }
+
           const sportValue = modalSportSelect.value === '__NEW__'
             ? modalNewSportInput.value.trim()
             : modalSportSelect.value.trim();
 
           const newItem = {
+            key: currentEditor.key,
             sport: sportValue,
             name: modalChampInput.value.trim(),
             sub: modalSubInput.value.trim(),
@@ -814,35 +1028,53 @@
 
           if (!newItem.sport || !newItem.name || !newItem.url) return;
 
-          modalSubmitBtn.disabled = true;
-          modalSubmitBtn.textContent = 'Сохранение...';
-
-          // Сразу обновляем интерфейс у текущего пользователя
-          mergeLinkIntoData(newItem);
-          refreshCurrentUI();
-
-          // Отправляем в Google Таблицу, чтобы увидели остальные
-          if (API_URL && !API_URL.includes('ВСТАВЬТЕ_СЮДА')) {
-            try {
-              await fetch(API_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify(newItem)
-              });
-              window.appCloseAddModal();
-              showToast('Ссылка добавлена и сохранена в общую базу!');
-            } catch (err) {
-              window.appCloseAddModal();
-              showToast('Ссылка добавлена локально (ошибка сети при отправке в базу).');
-            }
-          } else {
-            window.appCloseAddModal();
-            showToast('Ссылка добавлена! (Укажите API_URL, чтобы она сохранялась для всех).');
+          // 1. Локальная проверка на дубль по всей базе
+          const duplicate = findDuplicateLink(newItem.url);
+          if (duplicate) {
+            modalStatusMsg.textContent = `Эта ссылка уже есть в справочнике: «${duplicate.sport} → ${duplicate.champ}».`;
+            modalStatusMsg.className = 'text-xs px-3 py-2 rounded-lg bg-amber-50 text-amber-800 border border-amber-200';
+            modalStatusMsg.classList.remove('hidden');
+            return;
           }
 
-          modalSubmitBtn.disabled = false;
-          modalSubmitBtn.textContent = 'Сохранить ссылку';
+          modalSubmitBtn.disabled = true;
+          modalSubmitBtn.textContent = 'Сохранение...';
+          modalStatusMsg.classList.add('hidden');
+
+          try {
+            const response = await fetch(API_URL, {
+              method: 'POST',
+              headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+              body: JSON.stringify(newItem)
+            });
+            const result = await response.json();
+
+            if (result && result.status === 'ok') {
+              mergeLinkIntoData(newItem);
+              refreshCurrentUI();
+              window.appCloseAddModal();
+              showToast('Ссылка проверена и добавлена в общую базу!');
+            } else if (result && result.status === 'duplicate') {
+              modalStatusMsg.textContent = 'Эта ссылка уже была добавлена в таблицу другим редактором.';
+              modalStatusMsg.className = 'text-xs px-3 py-2 rounded-lg bg-amber-50 text-amber-800 border border-amber-200';
+              modalStatusMsg.classList.remove('hidden');
+            } else if (result && result.status === 'unauthorized') {
+              window.appLogoutEditor();
+              window.appCloseAddModal();
+              showToast('Ваш ключ доступа больше не действителен.');
+            } else {
+              modalStatusMsg.textContent = 'Не удалось сохранить ссылку. Проверьте заполненные поля.';
+              modalStatusMsg.className = 'text-xs px-3 py-2 rounded-lg bg-rose-50 text-rose-700 border border-rose-200';
+              modalStatusMsg.classList.remove('hidden');
+            }
+          } catch (err) {
+            modalStatusMsg.textContent = 'Ошибка сети при отправке в Google Таблицу. Попробуйте ещё раз.';
+            modalStatusMsg.className = 'text-xs px-3 py-2 rounded-lg bg-rose-50 text-rose-700 border border-rose-200';
+            modalStatusMsg.classList.remove('hidden');
+          } finally {
+            modalSubmitBtn.disabled = false;
+            modalSubmitBtn.textContent = 'Сохранить ссылку';
+          }
         });
 
         function toggleGuide(forceState) {
@@ -1111,6 +1343,7 @@
           localSearchInput.focus();
         });
 
+        restoreEditorSession();
         renderHomeGrid();
         navigateHome();
         loadRemoteLinks();
