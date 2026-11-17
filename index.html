@@ -5,9 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
   <title>Региональная Линия — Справочник спортивных чемпионатов</title>
-  <!-- Подключаем Tailwind CSS для адаптивного и чистого интерфейса -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Подключаем шрифт Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -16,7 +14,6 @@
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       -webkit-tap-highlight-color: transparent;
     }
-    /* Плавное появление экранов при переключении */
     .fade-in {
       animation: fadeIn 0.2s ease-out;
     }
@@ -28,12 +25,10 @@
 </head>
 <body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
 
-  <!-- =====================================================================
-       ШАПКА САЙТА (Единая для всех экранов)
-       ===================================================================== -->
+  <!-- ШАПКА САЙТА -->
   <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-4">
-      <!-- Логотип / Название, клик возвращает на главную -->
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-3">
+      <!-- Логотип -->
       <button type="button" id="brandLink" onclick="window.appNavigateHome && window.appNavigateHome()" class="flex items-center gap-3 group focus:outline-none text-left cursor-pointer">
         <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-sm group-hover:bg-blue-700 transition-colors shrink-0">
           РЛ
@@ -51,20 +46,33 @@
         </div>
       </button>
 
-      <!-- Кнопка раскрытия мини-инструкции -->
-      <button
-        type="button"
-        id="toggleGuideBtn"
-        onclick="window.appToggleGuide && window.appToggleGuide()"
-        aria-expanded="false"
-        class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer shrink-0"
-      >
-        <svg class="w-4 h-4 text-blue-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <circle cx="12" cy="12" r="10"></circle>
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 16v-4m0-4h.01"></path>
-        </svg>
-        <span>Как пользоваться</span>
-      </button>
+      <!-- Кнопки управления в шапке -->
+      <div class="flex items-center gap-2">
+        <button
+          type="button"
+          onclick="window.appOpenAddModal && window.appOpenAddModal()"
+          class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer shrink-0"
+        >
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
+          </svg>
+          <span>Добавить ссылку</span>
+        </button>
+
+        <button
+          type="button"
+          id="toggleGuideBtn"
+          onclick="window.appToggleGuide && window.appToggleGuide()"
+          aria-expanded="false"
+          class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer shrink-0"
+        >
+          <svg class="w-4 h-4 text-blue-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 16v-4m0-4h.01"></path>
+          </svg>
+          <span class="hidden sm:inline">Как пользоваться</span>
+        </button>
+      </div>
     </div>
 
     <!-- Скрываемая плашка с инструкцией -->
@@ -72,7 +80,7 @@
       <div class="max-w-5xl mx-auto px-4 sm:px-6 py-4 text-sm text-slate-700">
         <div class="flex items-start justify-between gap-4">
           <p class="leading-relaxed text-slate-700">
-            Выберите нужный вид спорта из списка ниже или введите название страны, лиги или примечания в строку поиска. Нажмите на любую ссылку справа от чемпионата, чтобы открыть источник в новой вкладке.
+            Выберите нужный вид спорта из списка ниже или введите название страны, лиги или примечания в строку поиска. Чтобы пополнить базу, нажмите <strong>«Добавить ссылку»</strong> — новая запись сразу появится в справочнике для всех пользователей.
           </p>
           <button
             type="button"
@@ -90,16 +98,11 @@
     </div>
   </header>
 
-  <!-- =====================================================================
-       ОСНОВНОЙ КОНТЕНТ (Динамически переключается между Главной и Разделом)
-       ===================================================================== -->
+  <!-- ОСНОВНОЙ КОНТЕНТ -->
   <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8">
 
-    <!-- -------------------------------------------------------------------
-         ЭКРАН 1: ГЛАВНАЯ СТРАНИЦА (Виды спорта + Глобальный поиск)
-         ------------------------------------------------------------------- -->
+    <!-- ЭКРАН 1: ГЛАВНАЯ СТРАНИЦА -->
     <section id="home-view" class="fade-in space-y-6">
-      <!-- Глобальная поисковая строка -->
       <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm">
         <label for="globalSearchInput" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
           Глобальный поиск по всем чемпионатам и примечаниям
@@ -129,7 +132,7 @@
         </div>
       </div>
 
-      <!-- Блок результатов глобального поиска (появляется при вводе текста) -->
+      <!-- Результаты глобального поиска -->
       <div id="globalSearchResultsContainer" class="hidden space-y-4">
         <div class="flex items-center justify-between">
           <h2 id="globalSearchCount" class="text-sm font-semibold text-slate-600">Найдено результатов: 0</h2>
@@ -146,37 +149,40 @@
         </div>
       </div>
 
-      <!-- Сетка карточек видов спорта (показывается, когда глобальный поиск пуст) -->
+      <!-- Сетка карточек видов спорта -->
       <div id="sportsGridContainer" class="space-y-4">
         <div class="flex items-center justify-between">
           <h2 class="text-base sm:text-lg font-bold text-slate-800">Выберите вид спорта или раздел</h2>
           <span id="totalStatsBadge" class="text-xs font-medium px-2.5 py-1 rounded-full bg-slate-200/70 text-slate-600"></span>
         </div>
-        <div id="sportsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <!-- Карточки генерируются автоматически из SPORTS_DATA -->
-        </div>
+        <div id="sportsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
       </div>
     </section>
 
-    <!-- -------------------------------------------------------------------
-         ЭКРАН 2: СТРАНИЦА КОНКРЕТНОГО ВИДА СПОРТА
-         ------------------------------------------------------------------- -->
+    <!-- ЭКРАН 2: СТРАНИЦА КОНКРЕТНОГО ВИДА СПОРТА -->
     <section id="sport-view" class="hidden fade-in space-y-5">
-      <!-- Верхняя панель навигации раздела -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div class="flex flex-wrap items-center justify-between gap-3">
         <button
           type="button"
           id="backToHomeBtn"
           onclick="window.appNavigateHome && window.appNavigateHome()"
-          class="inline-flex items-center gap-2 self-start px-4 py-2.5 rounded-xl bg-white border border-slate-200 hover:bg-slate-100 hover:border-slate-300 text-slate-700 font-medium text-sm shadow-sm transition-all cursor-pointer"
+          class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 hover:bg-slate-100 hover:border-slate-300 text-slate-700 font-medium text-sm shadow-sm transition-all cursor-pointer"
         >
           <span>&larr; Назад ко всем видам спорта</span>
         </button>
 
-        <span id="sportDetailCount" class="text-xs font-medium text-slate-500"></span>
+        <div class="flex items-center gap-3">
+          <span id="sportDetailCount" class="text-xs font-medium text-slate-500"></span>
+          <button
+            type="button"
+            onclick="window.appOpenAddModal && window.appOpenAddModal(true)"
+            class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition-colors cursor-pointer"
+          >
+            <span>+ Добавить сюда</span>
+          </button>
+        </div>
       </div>
 
-      <!-- Заголовок выбранного спорта и локальный поиск внутри него -->
       <div class="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
         <div class="flex items-center gap-3">
           <span id="sportDetailIcon" class="text-3xl sm:text-4xl select-none"></span>
@@ -186,7 +192,6 @@
           </div>
         </div>
 
-        <!-- Локальный поиск по чемпионатам внутри выбранного вида спорта -->
         <div class="relative">
           <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
             <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -212,20 +217,12 @@
         </div>
       </div>
 
-      <!-- Двухколоночная таблица / список чемпионатов -->
       <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <!-- Шапка 2 колонок для десктопа -->
         <div class="hidden md:grid md:grid-cols-12 bg-slate-100/80 border-b border-slate-200 px-6 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
           <div class="col-span-5">Чемпионат / Страна / Лига</div>
           <div class="col-span-7">Ссылки на сайты и примечания</div>
         </div>
-
-        <!-- Строки чемпионатов -->
-        <div id="championshipsList" class="divide-y divide-slate-200">
-          <!-- Генерируется автоматически -->
-        </div>
-
-        <!-- Сообщение, если локальный поиск ничего не нашёл -->
+        <div id="championshipsList" class="divide-y divide-slate-200"></div>
         <div id="localEmptyState" class="hidden py-12 px-4 text-center text-slate-500 text-sm">
           По вашему запросу в этом виде спорта ничего не найдено.
         </div>
@@ -234,31 +231,119 @@
 
   </main>
 
-  <!-- Подвал -->
+  <!-- МОДАЛЬНОЕ ОКНО ДОБАВЛЕНИЯ ССЫЛКИ -->
+  <div id="addLinkModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-lg w-full overflow-hidden fade-in">
+      <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/70">
+        <h3 class="text-lg font-bold text-slate-900">Добавить новую ссылку</h3>
+        <button type="button" onclick="window.appCloseAddModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-200/70 cursor-pointer">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <form id="addLinkForm" class="p-6 space-y-4">
+        <!-- Вид спорта -->
+        <div>
+          <label for="modalSportSelect" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
+            Вид спорта / раздел *
+          </label>
+          <select id="modalSportSelect" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+          </select>
+          <input
+            type="text"
+            id="modalNewSportInput"
+            placeholder="Введите название нового раздела..."
+            class="hidden mt-2 w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+        </div>
+
+        <!-- Чемпионат -->
+        <div>
+          <label for="modalChampInput" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
+            Чемпионат / Страна / Лига *
+          </label>
+          <input
+            type="text"
+            id="modalChampInput"
+            list="existingChampsList"
+            required
+            placeholder="Например: Германия. Оберлига или Казахстан"
+            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+          <datalist id="existingChampsList"></datalist>
+          <p class="text-[11px] text-slate-400 mt-1">Если выбрать существующий турнир из подсказки, ссылка добавится в его карточку.</p>
+        </div>
+
+        <!-- Подкатегория -->
+        <div>
+          <label for="modalSubInput" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
+            Подкатегория <span class="text-slate-400 font-normal lowercase">(необязательно)</span>
+          </label>
+          <input
+            type="text"
+            id="modalSubInput"
+            placeholder="Например: Женщины, 2-я лига, Кубок..."
+            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+        </div>
+
+        <!-- URL -->
+        <div>
+          <label for="modalUrlInput" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
+            Ссылка на сайт (URL) *
+          </label>
+          <input
+            type="url"
+            id="modalUrlInput"
+            required
+            placeholder="https://..."
+            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+        </div>
+
+        <!-- Примечание -->
+        <div>
+          <label for="modalNoteInput" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
+            Примечание <span class="text-slate-400 font-normal lowercase">(необязательно)</span>
+          </label>
+          <input
+            type="text"
+            id="modalNoteInput"
+            placeholder="Например: Основной сайт, есть трансляции..."
+            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+        </div>
+
+        <div id="modalStatusMsg" class="hidden text-xs px-3 py-2 rounded-lg"></div>
+
+        <div class="pt-2 flex items-center justify-end gap-3 border-t border-slate-100">
+          <button type="button" onclick="window.appCloseAddModal()" class="px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 cursor-pointer">
+            Отмена
+          </button>
+          <button type="submit" id="modalSubmitBtn" class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-colors cursor-pointer">
+            Сохранить ссылку
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Всплывающее уведомление -->
+  <div id="toastNotification" class="hidden fixed bottom-5 right-5 z-50 bg-slate-900 text-white text-sm font-medium px-4 py-3 rounded-xl shadow-lg fade-in"></div>
+
+  <!-- ПОДВАЛ -->
   <footer class="max-w-5xl w-full mx-auto px-4 sm:px-6 py-6 text-center text-xs text-slate-400">
     Региональная Линия &bull; Справочник турниров и официальных сайтов
   </footer>
 
-  <!-- =====================================================================
-       ДАННЫЕ И ЛОГИКА РАБОТЫ САЙТА
-       ===================================================================== -->
   <script>
-    /**
-     * =====================================================================
-     * БАЗА ДАННЫХ ЧЕМПИОНАТОВ (SPORTS_DATA)
-     * =====================================================================
-     * Как редактировать вручную:
-     * 1. Каждый вид спорта — это объект вида:
-     *    { sport: "Название спорта", championships: [ ... ] }
-     * 2. Каждый чемпионат внутри championships — это объект:
-     *    {
-     *      name: "Название страны или турнира",
-     *      links: [
-     *        { sub: "Подкатегория (если есть, иначе '')", url: "https://...", note: "Примечание (если есть, иначе '')" }
-     *      ]
-     *    }
-     * Просто скопируйте любой блок, вставьте через запятую и замените текст.
-     */
+    // =====================================================================
+    // ВСТАВЬТЕ СЮДА ССЫЛКУ НА ВАШЕ ВЕБ-ПРИЛОЖЕНИЕ GOOGLE APPS SCRIPT
+    // =====================================================================
+    const API_URL = 'https://script.google.com/macros/s/AKfycbxviCVTZIOEetY5R90w8VfYcGtkqA7h4K1TqoGKKLdhFOvq7nP5fMitOCvEyvyAuKL_7g/exec';
+
     const SPORTS_DATA = [
       {
         "sport": "Футбол",
@@ -445,9 +530,6 @@
       }
     ];
 
-    /**
-     * Иконки для всех 13 разделов (при добавлении нового спорта подставится стандартная иконка 🏆)
-     */
     const SPORT_ICONS = {
       "Футбол": "⚽",
       "Хоккей": "🏒",
@@ -468,9 +550,6 @@
       return SPORT_ICONS[sportName] || "🏆";
     }
 
-    /**
-     * Склонение слова "турнир" (1 турнир, 2 турнира, 5 турниров)
-     */
     function pluralizeChamps(count) {
       const mod10 = count % 10;
       const mod100 = count % 100;
@@ -479,9 +558,6 @@
       return `${count} турниров`;
     }
 
-    /**
-     * Склонение слова "ссылка" (1 ссылка, 2 ссылки, 5 ссылок)
-     */
     function pluralizeLinks(count) {
       const mod10 = count % 10;
       const mod100 = count % 100;
@@ -490,9 +566,6 @@
       return `${count} ссылок`;
     }
 
-    /**
-     * Склонение слова "раздел" (1 раздел, 2 раздела, 5 разделов)
-     */
     function pluralizeSections(count) {
       const mod10 = count % 10;
       const mod100 = count % 100;
@@ -501,9 +574,6 @@
       return `${count} разделов`;
     }
 
-    /**
-     * Извлечение аккуратного домена/метки из длинного URL для отображения на кнопке
-     */
     function formatLinkLabel(url) {
       try {
         const parsed = new URL(url);
@@ -519,9 +589,6 @@
       }
     }
 
-    /**
-     * Экранирование HTML для безопасного вывода текста
-     */
     function escapeHtml(str) {
       if (!str) return '';
       return str
@@ -532,9 +599,6 @@
         .replace(/'/g, '&#039;');
     }
 
-    /**
-     * Рендер списка ссылок и примечаний для одного чемпионата (правая колонка)
-     */
     function renderLinksColumn(links) {
       return links.map(item => {
         const domainLabel = formatLinkLabel(item.url);
@@ -542,7 +606,6 @@
           ? `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200/70 mr-2">${escapeHtml(item.sub)}</span>`
           : '';
 
-        // Выделяем важные подсказки цветом, если в тексте есть ключевые слова
         let noteHtml = '';
         if (item.note) {
           const isPrimary = /основн/i.test(item.note);
@@ -583,23 +646,45 @@
       }).join('');
     }
 
-    // =====================================================================
-    // ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ И НАВИГАЦИЯ В ПАМЯТИ (БЕЗ HASH / PUSHSTATE)
-    // =====================================================================
+    // Функция вливания одной новой ссылки в структуру SPORTS_DATA без дублей
+    function mergeLinkIntoData(item) {
+      const sportName = (item.sport || '').trim();
+      const champName = (item.name || '').trim();
+      const subName = (item.sub || '').trim();
+      const url = (item.url || '').trim();
+      const note = (item.note || '').trim();
+
+      if (!sportName || !champName || !url) return;
+
+      let sportObj = SPORTS_DATA.find(s => s.sport.toLowerCase() === sportName.toLowerCase());
+      if (!sportObj) {
+        sportObj = { sport: sportName, championships: [] };
+        SPORTS_DATA.push(sportObj);
+      }
+
+      let champObj = sportObj.championships.find(c => c.name.toLowerCase() === champName.toLowerCase());
+      if (!champObj) {
+        champObj = { name: champName, links: [] };
+        sportObj.championships.push(champObj);
+      }
+
+      const alreadyExists = champObj.links.some(l => l.url.toLowerCase() === url.toLowerCase());
+      if (!alreadyExists) {
+        champObj.links.push({ sub: subName, url: url, note: note });
+      }
+    }
+
     function initApp() {
       try {
-        // Элементы интерфейса
         const homeView = document.getElementById('home-view');
         const sportDetailView = document.getElementById('sport-view');
         const sportsGrid = document.getElementById('sportsGrid');
         const totalStatsBadge = document.getElementById('totalStatsBadge');
         const headerSummaryBadge = document.getElementById('headerSummaryBadge');
 
-        // Инструкция
         const toggleGuideBtn = document.getElementById('toggleGuideBtn');
         const guidePanel = document.getElementById('guidePanel');
 
-        // Глобальный поиск
         const globalSearchInput = document.getElementById('globalSearchInput');
         const clearGlobalSearchBtn = document.getElementById('clearGlobalSearchBtn');
         const resetSearchLink = document.getElementById('resetSearchLink');
@@ -608,7 +693,6 @@
         const globalSearchCount = document.getElementById('globalSearchCount');
         const sportsGridContainer = document.getElementById('sportsGridContainer');
 
-        // Страница конкретного вида спорта
         const sportDetailIcon = document.getElementById('sportDetailIcon');
         const sportDetailTitle = document.getElementById('sportDetailTitle');
         const sportDetailCount = document.getElementById('sportDetailCount');
@@ -617,10 +701,150 @@
         const championshipsList = document.getElementById('championshipsList');
         const localEmptyState = document.getElementById('localEmptyState');
 
+        // Элементы модального окна
+        const addLinkModal = document.getElementById('addLinkModal');
+        const addLinkForm = document.getElementById('addLinkForm');
+        const modalSportSelect = document.getElementById('modalSportSelect');
+        const modalNewSportInput = document.getElementById('modalNewSportInput');
+        const modalChampInput = document.getElementById('modalChampInput');
+        const existingChampsList = document.getElementById('existingChampsList');
+        const modalSubInput = document.getElementById('modalSubInput');
+        const modalUrlInput = document.getElementById('modalUrlInput');
+        const modalNoteInput = document.getElementById('modalNoteInput');
+        const modalSubmitBtn = document.getElementById('modalSubmitBtn');
+        const modalStatusMsg = document.getElementById('modalStatusMsg');
+        const toastNotification = document.getElementById('toastNotification');
+
         let currentView = 'home';
         let activeSportIndex = null;
 
-        // 1. Логика кнопки "Как пользоваться"
+        function showToast(text) {
+          toastNotification.textContent = text;
+          toastNotification.classList.remove('hidden');
+          setTimeout(() => {
+            toastNotification.classList.add('hidden');
+          }, 3500);
+        }
+
+        function refreshCurrentUI() {
+          renderHomeGrid();
+          if (currentView === 'sport' && activeSportIndex !== null) {
+            renderSportDetail(activeSportIndex, localSearchInput.value);
+          } else if (globalSearchInput.value.trim()) {
+            handleGlobalSearch();
+          }
+        }
+
+        // Загрузка пользовательских ссылок из Google Таблицы при открытии сайта
+        async function loadRemoteLinks() {
+          if (!API_URL || API_URL.includes('ВСТАВЬТЕ_СЮДА')) return;
+          try {
+            const response = await fetch(API_URL);
+            if (!response.ok) return;
+            const remoteItems = await response.json();
+            if (Array.isArray(remoteItems) && remoteItems.length > 0) {
+              remoteItems.forEach(mergeLinkIntoData);
+              refreshCurrentUI();
+            }
+          } catch (err) {
+            console.warn('Не удалось загрузить внешние ссылки:', err);
+          }
+        }
+
+        // Управление модальным окном
+        function updateChampDatalist() {
+          const selectedSport = modalSportSelect.value;
+          const sportObj = SPORTS_DATA.find(s => s.sport === selectedSport);
+          if (!sportObj) {
+            existingChampsList.innerHTML = '';
+            return;
+          }
+          existingChampsList.innerHTML = sportObj.championships
+            .map(c => `<option value="${escapeHtml(c.name)}"></option>`)
+            .join('');
+        }
+
+        modalSportSelect.addEventListener('change', () => {
+          const isNew = modalSportSelect.value === '__NEW__';
+          modalNewSportInput.classList.toggle('hidden', !isNew);
+          modalNewSportInput.required = isNew;
+          updateChampDatalist();
+        });
+
+        window.appOpenAddModal = function(preselectCurrentSport = false) {
+          addLinkForm.reset();
+          modalStatusMsg.classList.add('hidden');
+          modalNewSportInput.classList.add('hidden');
+          modalNewSportInput.required = false;
+
+          const optionsHtml = SPORTS_DATA.map(s => `<option value="${escapeHtml(s.sport)}">${escapeHtml(s.sport)}</option>`).join('')
+            + `<option value="__NEW__">+ Создать новый раздел...</option>`;
+          modalSportSelect.innerHTML = optionsHtml;
+
+          if (preselectCurrentSport && activeSportIndex !== null && SPORTS_DATA[activeSportIndex]) {
+            modalSportSelect.value = SPORTS_DATA[activeSportIndex].sport;
+          }
+
+          updateChampDatalist();
+          addLinkModal.classList.remove('hidden');
+        };
+
+        window.appCloseAddModal = function() {
+          addLinkModal.classList.add('hidden');
+        };
+
+        addLinkModal.addEventListener('click', (e) => {
+          if (e.target === addLinkModal) window.appCloseAddModal();
+        });
+
+        addLinkForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+
+          const sportValue = modalSportSelect.value === '__NEW__'
+            ? modalNewSportInput.value.trim()
+            : modalSportSelect.value.trim();
+
+          const newItem = {
+            sport: sportValue,
+            name: modalChampInput.value.trim(),
+            sub: modalSubInput.value.trim(),
+            url: modalUrlInput.value.trim(),
+            note: modalNoteInput.value.trim()
+          };
+
+          if (!newItem.sport || !newItem.name || !newItem.url) return;
+
+          modalSubmitBtn.disabled = true;
+          modalSubmitBtn.textContent = 'Сохранение...';
+
+          // Сразу обновляем интерфейс у текущего пользователя
+          mergeLinkIntoData(newItem);
+          refreshCurrentUI();
+
+          // Отправляем в Google Таблицу, чтобы увидели остальные
+          if (API_URL && !API_URL.includes('ВСТАВЬТЕ_СЮДА')) {
+            try {
+              await fetch(API_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(newItem)
+              });
+              window.appCloseAddModal();
+              showToast('Ссылка добавлена и сохранена в общую базу!');
+            } catch (err) {
+              window.appCloseAddModal();
+              showToast('Ссылка добавлена локально (ошибка сети при отправке в базу).');
+            }
+          } else {
+            window.appCloseAddModal();
+            showToast('Ссылка добавлена! (Укажите API_URL, чтобы она сохранялась для всех).');
+          }
+
+          modalSubmitBtn.disabled = false;
+          modalSubmitBtn.textContent = 'Сохранить ссылку';
+        });
+
         function toggleGuide(forceState) {
           if (!guidePanel || !toggleGuideBtn) return;
           const isCurrentlyHidden = guidePanel.classList.contains('hidden');
@@ -630,7 +854,6 @@
         }
         window.appToggleGuide = toggleGuide;
 
-        // 2. Переключение экранов исключительно в памяти (без location.hash и history.pushState)
         function openSportView(idx) {
           const sportIndex = Number(idx);
           if (Number.isNaN(sportIndex) || !SPORTS_DATA[sportIndex]) return;
@@ -672,7 +895,6 @@
         window.appOpenSport = openSportView;
         window.appNavigateHome = navigateHome;
 
-        // 3. Построение карточек видов спорта на главной странице
         function renderHomeGrid() {
           let totalChamps = 0;
           let totalLinks = 0;
@@ -718,7 +940,6 @@
           if (headerSummaryBadge) headerSummaryBadge.textContent = summaryText;
         }
 
-        // Делегирование кликов по сетке видов спорта (страховка на случай клика по любой области карточки)
         sportsGrid.addEventListener('click', (event) => {
           const card = event.target.closest('[data-sport-index]');
           if (card) {
@@ -727,7 +948,6 @@
           }
         });
 
-        // 4. Глобальный сквозной поиск по всем видам спорта
         function handleGlobalSearch() {
           const query = globalSearchInput.value.trim().toLowerCase();
           clearGlobalSearchBtn.classList.toggle('hidden', query.length === 0);
@@ -767,7 +987,7 @@
           if (matches.length === 0) {
             globalSearchResultsList.innerHTML = `
               <div class="p-10 text-center text-slate-500 text-sm">
-                По запросу <strong class="text-slate-800">«${escapeHtml(globalSearchInput.value.trim())}»</strong> ничего не найдено. Попробуйте изменить запрос.
+                По запросу <strong class="text-slate-800">«${escapeHtml(globalSearchInput.value.trim())}»</strong> ничего не найдено.
               </div>
             `;
             return;
@@ -798,7 +1018,6 @@
           `).join('');
         }
 
-        // Делегирование кликов по бейджам вида спорта в результатах глобального поиска
         globalSearchResultsList.addEventListener('click', (event) => {
           const badge = event.target.closest('[data-sport-index]');
           if (badge) {
@@ -818,7 +1037,6 @@
         clearGlobalSearchBtn.addEventListener('click', clearGlobalSearch);
         resetSearchLink.addEventListener('click', clearGlobalSearch);
 
-        // 5. Отрисовка страницы выбранного вида спорта (2 колонки)
         function renderSportDetail(sportIdx, filterQuery = '') {
           const sportObj = SPORTS_DATA[sportIdx];
           if (!sportObj) {
@@ -865,15 +1083,12 @@
 
             return `
               <div class="grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-6 px-4 sm:px-6 py-4 hover:bg-slate-50/80 transition-colors items-start">
-                <!-- Левая колонка: Название чемпионата / страны -->
                 <div class="md:col-span-5">
                   <div class="font-semibold text-slate-900 text-sm sm:text-base">
                     ${escapeHtml(champ.name)}
                   </div>
                   ${subsSummaryHtml}
                 </div>
-
-                <!-- Правая колонка: Кликабельные ссылки и примечания -->
                 <div class="md:col-span-7 divide-y divide-slate-100">
                   ${renderLinksColumn(champ.links)}
                 </div>
@@ -896,9 +1111,9 @@
           localSearchInput.focus();
         });
 
-        // Первичный запуск
         renderHomeGrid();
         navigateHome();
+        loadRemoteLinks();
       } catch (err) {
         console.error('Ошибка инициализации справочника:', err);
       }
