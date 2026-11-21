@@ -54,7 +54,7 @@
           id="editorLoginBtn"
           onclick="window.appOpenLoginModal && window.appOpenLoginModal()"
           class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer shrink-0"
-          title="Вход по ключу доступа для добавления ссылок"
+          title="Вход по ключу доступа для добавления и редактирования ссылок"
         >
           <svg class="w-4 h-4 text-slate-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
@@ -403,6 +403,104 @@
     </div>
   </div>
 
+  <!-- МОДАЛЬНОЕ ОКНО РЕДАКТИРОВАНИЯ ССЫЛКИ -->
+  <div id="editLinkModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-lg w-full overflow-hidden fade-in">
+      <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/70">
+        <h3 class="text-lg font-bold text-slate-900">Редактировать ссылку</h3>
+        <button type="button" onclick="window.appCloseEditModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-200/70 cursor-pointer">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <form id="editLinkForm" class="p-6 space-y-4">
+        <!-- Вид спорта -->
+        <div>
+          <label for="editSportSelect" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
+            Вид спорта / раздел *
+          </label>
+          <select id="editSportSelect" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+          </select>
+          <input
+            type="text"
+            id="editNewSportInput"
+            placeholder="Введите название нового раздела..."
+            class="hidden mt-2 w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+        </div>
+
+        <!-- Чемпионат -->
+        <div>
+          <label for="editChampInput" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
+            Чемпионат / Страна / Лига *
+          </label>
+          <input
+            type="text"
+            id="editChampInput"
+            list="editExistingChampsList"
+            required
+            placeholder="Например: Германия. Оберлига или Казахстан"
+            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+          <datalist id="editExistingChampsList"></datalist>
+        </div>
+
+        <!-- Подкатегория -->
+        <div>
+          <label for="editSubInput" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
+            Подкатегория <span class="text-slate-400 font-normal lowercase">(необязательно)</span>
+          </label>
+          <input
+            type="text"
+            id="editSubInput"
+            placeholder="Например: Женщины, 2-я лига, Кубок..."
+            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+        </div>
+
+        <!-- URL -->
+        <div>
+          <label for="editUrlInput" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
+            Ссылка на сайт (URL) *
+          </label>
+          <input
+            type="url"
+            id="editUrlInput"
+            required
+            placeholder="https://..."
+            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+        </div>
+
+        <!-- Примечание -->
+        <div>
+          <label for="editNoteInput" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
+            Примечание <span class="text-slate-400 font-normal lowercase">(необязательно)</span>
+          </label>
+          <input
+            type="text"
+            id="editNoteInput"
+            placeholder="Например: Основной сайт, есть трансляции..."
+            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+        </div>
+
+        <div id="editStatusMsg" class="hidden text-xs px-3 py-2 rounded-lg"></div>
+
+        <div class="pt-2 flex items-center justify-end gap-3 border-t border-slate-100">
+          <button type="button" onclick="window.appCloseEditModal()" class="px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 cursor-pointer">
+            Отмена
+          </button>
+          <button type="submit" id="editSubmitBtn" class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-colors cursor-pointer">
+            Сохранить изменения
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Всплывающее уведомление -->
   <div id="toastNotification" class="hidden fixed bottom-5 right-5 z-50 bg-slate-900 text-white text-sm font-medium px-4 py-3 rounded-xl shadow-lg fade-in"></div>
 
@@ -680,13 +778,17 @@
         .replace(/\/+$/, '');
     }
 
-    // Поиск дубликата ссылки по всей базе справочника
-    function findDuplicateLink(url) {
+    // Поиск дубликата ссылки по всей базе справочника (с возможностью исключить текущую ссылку при редактировании)
+    function findDuplicateLink(url, excludeNormUrl = '') {
       const target = normalizeUrl(url);
       if (!target) return null;
       for (const sportObj of SPORTS_DATA) {
         for (const champ of sportObj.championships) {
-          const found = champ.links.find(l => normalizeUrl(l.url) === target);
+          const found = champ.links.find(l => {
+            const norm = normalizeUrl(l.url);
+            if (excludeNormUrl && norm === excludeNormUrl) return false;
+            return norm === target;
+          });
           if (found) {
             return { sport: sportObj.sport, champ: champ.name };
           }
@@ -695,62 +797,46 @@
       return null;
     }
 
-    function renderLinksColumn(links) {
-      return links.map(item => {
-        const domainLabel = formatLinkLabel(item.url);
-        const subBadge = item.sub
-          ? `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200/70 mr-2">${escapeHtml(item.sub)}</span>`
-          : '';
+    // Удаление ссылки из текущей позиции при переносе в другой раздел/чемпионат или при замене
+    function removeLinkFromData(sportName, champName, targetUrl) {
+      const normTarget = normalizeUrl(targetUrl);
+      if (!normTarget) return;
 
-        let noteHtml = '';
-        if (item.note) {
-          const isPrimary = /основн/i.test(item.note);
-          const isWarning = /регистрац|вероятность/i.test(item.note);
-          let noteClasses = 'bg-slate-100 text-slate-600 border-slate-200';
-          if (isPrimary) noteClasses = 'bg-emerald-50 text-emerald-800 border-emerald-200';
-          else if (isWarning) noteClasses = 'bg-amber-50 text-amber-800 border-amber-200';
+      for (let sIdx = SPORTS_DATA.length - 1; sIdx >= 0; sIdx--) {
+        const sportObj = SPORTS_DATA[sIdx];
+        if (sportName && sportObj.sport.toLowerCase() !== sportName.toLowerCase()) continue;
 
-          noteHtml = `
-            <div class="mt-1.5 text-xs px-2.5 py-1.5 rounded-lg border ${noteClasses} leading-relaxed">
-              ${escapeHtml(item.note)}
-            </div>
-          `;
+        for (let cIdx = sportObj.championships.length - 1; cIdx >= 0; cIdx--) {
+          const champObj = sportObj.championships[cIdx];
+          if (champName && champObj.name.toLowerCase() !== champName.toLowerCase()) continue;
+
+          champObj.links = champObj.links.filter(l => normalizeUrl(l.url) !== normTarget);
+          if (champObj.links.length === 0) {
+            sportObj.championships.splice(cIdx, 1);
+          }
         }
 
-        return `
-          <div class="py-1.5 first:pt-0 last:pb-0">
-            <div class="flex flex-wrap items-center gap-y-1">
-              ${subBadge}
-              <a
-                href="${escapeHtml(item.url)}"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline break-all group"
-              >
-                <span>${escapeHtml(domainLabel)}</span>
-                <svg class="w-3.5 h-3.5 text-blue-400 group-hover:text-blue-600 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"></path>
-                </svg>
-              </a>
-            </div>
-            <div class="text-[11px] text-slate-400 truncate max-w-md mt-0.5" title="${escapeHtml(item.url)}">
-              ${escapeHtml(item.url)}
-            </div>
-            ${noteHtml}
-          </div>
-        `;
-      }).join('');
+        if (sportObj.championships.length === 0 && !sportObj.hideTournamentCount) {
+          SPORTS_DATA.splice(sIdx, 1);
+        }
+      }
     }
 
-    // Функция вливания одной новой ссылки в структуру SPORTS_DATA без дублей
+    // Вливание новой или обновлённой ссылки в структуру SPORTS_DATA
     function mergeLinkIntoData(item) {
       const sportName = (item.sport || '').trim();
       const champName = (item.name || '').trim();
       const subName = (item.sub || '').trim();
       const url = (item.url || '').trim();
       const note = (item.note || '').trim();
+      const origUrl = (item.origUrl || '').trim();
 
       if (!sportName || !champName || !url) return;
+
+      // Если запись в таблице заменяет встроенную ссылку из SPORTS_DATA — удаляем старую версию
+      if (origUrl) {
+        removeLinkFromData('', '', origUrl);
+      }
 
       let sportObj = SPORTS_DATA.find(s => s.sport.toLowerCase() === sportName.toLowerCase());
       if (!sportObj) {
@@ -765,8 +851,12 @@
       }
 
       const targetNorm = normalizeUrl(url);
-      const alreadyExists = champObj.links.some(l => normalizeUrl(l.url) === targetNorm);
-      if (!alreadyExists) {
+      const existingLink = champObj.links.find(l => normalizeUrl(l.url) === targetNorm);
+      if (existingLink) {
+        existingLink.sub = subName;
+        existingLink.url = url;
+        existingLink.note = note;
+      } else {
         champObj.links.push({ sub: subName, url: url, note: note });
       }
     }
@@ -823,11 +913,30 @@
         const modalNoteInput = document.getElementById('modalNoteInput');
         const modalSubmitBtn = document.getElementById('modalSubmitBtn');
         const modalStatusMsg = document.getElementById('modalStatusMsg');
+
+        // Элементы модального окна редактирования ссылки
+        const editLinkModal = document.getElementById('editLinkModal');
+        const editLinkForm = document.getElementById('editLinkForm');
+        const editSportSelect = document.getElementById('editSportSelect');
+        const editNewSportInput = document.getElementById('editNewSportInput');
+        const editChampInput = document.getElementById('editChampInput');
+        const editExistingChampsList = document.getElementById('editExistingChampsList');
+        const editSubInput = document.getElementById('editSubInput');
+        const editUrlInput = document.getElementById('editUrlInput');
+        const editNoteInput = document.getElementById('editNoteInput');
+        const editSubmitBtn = document.getElementById('editSubmitBtn');
+        const editStatusMsg = document.getElementById('editStatusMsg');
+
         const toastNotification = document.getElementById('toastNotification');
 
         let currentView = 'home';
         let activeSportIndex = null;
         let currentEditor = null; // { name, key }
+        let editingContext = null; // { sport, champ, sub, url, note }
+
+        function isEditorLoggedIn() {
+          return Boolean(currentEditor && currentEditor.key);
+        }
 
         function showToast(text) {
           toastNotification.textContent = text;
@@ -837,9 +946,81 @@
           }, 3800);
         }
 
+        function renderLinksColumn(links, contextMeta) {
+          const isEditor = isEditorLoggedIn();
+
+          return links.map(item => {
+            const domainLabel = formatLinkLabel(item.url);
+            const subBadge = item.sub
+              ? `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200/70 mr-2">${escapeHtml(item.sub)}</span>`
+              : '';
+
+            let noteHtml = '';
+            if (item.note) {
+              const isPrimary = /основн/i.test(item.note);
+              const isWarning = /регистрац|вероятность/i.test(item.note);
+              let noteClasses = 'bg-slate-100 text-slate-600 border-slate-200';
+              if (isPrimary) noteClasses = 'bg-emerald-50 text-emerald-800 border-emerald-200';
+              else if (isWarning) noteClasses = 'bg-amber-50 text-amber-800 border-amber-200';
+
+              noteHtml = `
+                <div class="mt-1.5 text-xs px-2.5 py-1.5 rounded-lg border ${noteClasses} leading-relaxed">
+                  ${escapeHtml(item.note)}
+                </div>
+              `;
+            }
+
+            const editBtnHtml = (isEditor && contextMeta)
+              ? `
+                <button
+                  type="button"
+                  data-edit-sport="${escapeHtml(contextMeta.sport)}"
+                  data-edit-champ="${escapeHtml(contextMeta.champ)}"
+                  data-edit-sub="${escapeHtml(item.sub || '')}"
+                  data-edit-url="${escapeHtml(item.url)}"
+                  data-edit-note="${escapeHtml(item.note || '')}"
+                  class="edit-link-btn inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium text-slate-600 bg-slate-100 hover:bg-blue-50 hover:text-blue-700 border border-slate-200 hover:border-blue-200 transition-colors cursor-pointer shrink-0 ml-auto"
+                  title="Редактировать эту ссылку"
+                >
+                  <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 3.487a2.25 2.25 0 113.182 3.182L7.5 19.213 3 20.5l1.287-4.5L16.862 3.487z"></path>
+                  </svg>
+                  <span>Изменить</span>
+                </button>
+              `
+              : '';
+
+            return `
+              <div class="py-1.5 first:pt-0 last:pb-0">
+                <div class="flex flex-wrap items-center gap-y-1 gap-x-2">
+                  <div class="flex flex-wrap items-center gap-y-1">
+                    ${subBadge}
+                    <a
+                      href="${escapeHtml(item.url)}"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline break-all group"
+                    >
+                      <span>${escapeHtml(domainLabel)}</span>
+                      <svg class="w-3.5 h-3.5 text-blue-400 group-hover:text-blue-600 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"></path>
+                      </svg>
+                    </a>
+                  </div>
+                  ${editBtnHtml}
+                </div>
+                <div class="text-[11px] text-slate-400 truncate max-w-md mt-0.5" title="${escapeHtml(item.url)}">
+                  ${escapeHtml(item.url)}
+                </div>
+                ${noteHtml}
+              </div>
+            `;
+          }).join('');
+        }
+
         // Обновление видимости кнопок в зависимости от статуса редактора
         function syncAuthUI() {
-          const isEditor = Boolean(currentEditor && currentEditor.key);
+          const isEditor = isEditorLoggedIn();
           editorLoginBtn.classList.toggle('hidden', isEditor);
           headerAddLinkBtn.classList.toggle('hidden', !isEditor);
           sectionAddLinkBtn.classList.toggle('hidden', !isEditor);
@@ -847,6 +1028,7 @@
           if (isEditor) {
             editorNameLabel.textContent = `Редактор: ${currentEditor.name}`;
           }
+          refreshCurrentUI();
         }
 
         // Восстановление сессии редактора из localStorage
@@ -931,7 +1113,11 @@
         function refreshCurrentUI() {
           renderHomeGrid();
           if (currentView === 'sport' && activeSportIndex !== null) {
-            renderSportDetail(activeSportIndex, localSearchInput.value);
+            if (SPORTS_DATA[activeSportIndex]) {
+              renderSportDetail(activeSportIndex, localSearchInput.value);
+            } else {
+              navigateHome();
+            }
           } else if (globalSearchInput.value.trim()) {
             handleGlobalSearch();
           }
@@ -954,14 +1140,14 @@
         }
 
         // Управление модальным окном добавления ссылки
-        function updateChampDatalist() {
-          const selectedSport = modalSportSelect.value;
+        function updateChampDatalist(selectEl, datalistEl) {
+          const selectedSport = selectEl.value;
           const sportObj = SPORTS_DATA.find(s => s.sport === selectedSport);
           if (!sportObj) {
-            existingChampsList.innerHTML = '';
+            datalistEl.innerHTML = '';
             return;
           }
-          existingChampsList.innerHTML = sportObj.championships
+          datalistEl.innerHTML = sportObj.championships
             .map(c => `<option value="${escapeHtml(c.name)}"></option>`)
             .join('');
         }
@@ -970,11 +1156,11 @@
           const isNew = modalSportSelect.value === '__NEW__';
           modalNewSportInput.classList.toggle('hidden', !isNew);
           modalNewSportInput.required = isNew;
-          updateChampDatalist();
+          updateChampDatalist(modalSportSelect, existingChampsList);
         });
 
         window.appOpenAddModal = function(preselectCurrentSport = false) {
-          if (!currentEditor || !currentEditor.key) {
+          if (!isEditorLoggedIn()) {
             window.appOpenLoginModal();
             return;
           }
@@ -992,7 +1178,7 @@
             modalSportSelect.value = SPORTS_DATA[activeSportIndex].sport;
           }
 
-          updateChampDatalist();
+          updateChampDatalist(modalSportSelect, existingChampsList);
           addLinkModal.classList.remove('hidden');
         };
 
@@ -1007,7 +1193,7 @@
         addLinkForm.addEventListener('submit', async (e) => {
           e.preventDefault();
 
-          if (!currentEditor || !currentEditor.key) {
+          if (!isEditorLoggedIn()) {
             window.appCloseAddModal();
             window.appOpenLoginModal();
             return;
@@ -1028,7 +1214,6 @@
 
           if (!newItem.sport || !newItem.name || !newItem.url) return;
 
-          // 1. Локальная проверка на дубль по всей базе
           const duplicate = findDuplicateLink(newItem.url);
           if (duplicate) {
             modalStatusMsg.textContent = `Эта ссылка уже есть в справочнике: «${duplicate.sport} → ${duplicate.champ}».`;
@@ -1074,6 +1259,164 @@
           } finally {
             modalSubmitBtn.disabled = false;
             modalSubmitBtn.textContent = 'Сохранить ссылку';
+          }
+        });
+
+        // Управление модальным окном редактирования ссылки
+        editSportSelect.addEventListener('change', () => {
+          const isNew = editSportSelect.value === '__NEW__';
+          editNewSportInput.classList.toggle('hidden', !isNew);
+          editNewSportInput.required = isNew;
+          updateChampDatalist(editSportSelect, editExistingChampsList);
+        });
+
+        window.appOpenEditModal = function(meta) {
+          if (!isEditorLoggedIn()) {
+            window.appOpenLoginModal();
+            return;
+          }
+
+          editingContext = {
+            sport: meta.sport,
+            champ: meta.champ,
+            sub: meta.sub || '',
+            url: meta.url,
+            note: meta.note || ''
+          };
+
+          editStatusMsg.classList.add('hidden');
+          editNewSportInput.classList.add('hidden');
+          editNewSportInput.required = false;
+          editNewSportInput.value = '';
+
+          const optionsHtml = SPORTS_DATA.map(s => `<option value="${escapeHtml(s.sport)}">${escapeHtml(s.sport)}</option>`).join('')
+            + `<option value="__NEW__">+ Создать новый раздел...</option>`;
+          editSportSelect.innerHTML = optionsHtml;
+          editSportSelect.value = meta.sport;
+
+          updateChampDatalist(editSportSelect, editExistingChampsList);
+
+          editChampInput.value = meta.champ;
+          editSubInput.value = meta.sub || '';
+          editUrlInput.value = meta.url;
+          editNoteInput.value = meta.note || '';
+
+          editLinkModal.classList.remove('hidden');
+        };
+
+        window.appCloseEditModal = function() {
+          editLinkModal.classList.add('hidden');
+          editingContext = null;
+        };
+
+        editLinkModal.addEventListener('click', (e) => {
+          if (e.target === editLinkModal) window.appCloseEditModal();
+        });
+
+        document.addEventListener('click', (e) => {
+          const btn = e.target.closest('.edit-link-btn');
+          if (!btn) return;
+          e.preventDefault();
+          e.stopPropagation();
+
+          window.appOpenEditModal({
+            sport: btn.getAttribute('data-edit-sport') || '',
+            champ: btn.getAttribute('data-edit-champ') || '',
+            sub: btn.getAttribute('data-edit-sub') || '',
+            url: btn.getAttribute('data-edit-url') || '',
+            note: btn.getAttribute('data-edit-note') || ''
+          });
+        });
+
+        editLinkForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+
+          if (!isEditorLoggedIn()) {
+            window.appCloseEditModal();
+            window.appOpenLoginModal();
+            return;
+          }
+          if (!editingContext) return;
+
+          const sportValue = editSportSelect.value === '__NEW__'
+            ? editNewSportInput.value.trim()
+            : editSportSelect.value.trim();
+
+          const updatedItem = {
+            action: 'edit',
+            key: currentEditor.key,
+            origSport: editingContext.sport,
+            origName: editingContext.champ,
+            origUrl: editingContext.url,
+            sport: sportValue,
+            name: editChampInput.value.trim(),
+            sub: editSubInput.value.trim(),
+            url: editUrlInput.value.trim(),
+            note: editNoteInput.value.trim()
+          };
+
+          if (!updatedItem.sport || !updatedItem.name || !updatedItem.url) return;
+
+          // Проверяем дубликат, исключая редактируемую ссылку
+          const duplicate = findDuplicateLink(updatedItem.url, normalizeUrl(editingContext.url));
+          if (duplicate) {
+            editStatusMsg.textContent = `Эта ссылка уже используется в другом месте: «${duplicate.sport} → ${duplicate.champ}».`;
+            editStatusMsg.className = 'text-xs px-3 py-2 rounded-lg bg-amber-50 text-amber-800 border border-amber-200';
+            editStatusMsg.classList.remove('hidden');
+            return;
+          }
+
+          editSubmitBtn.disabled = true;
+          editSubmitBtn.textContent = 'Сохранение...';
+          editStatusMsg.classList.add('hidden');
+
+          try {
+            const response = await fetch(API_URL, {
+              method: 'POST',
+              headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+              body: JSON.stringify(updatedItem)
+            });
+            const result = await response.json();
+
+            if (result && result.status === 'ok') {
+              removeLinkFromData(editingContext.sport, editingContext.champ, editingContext.url);
+              mergeLinkIntoData({
+                sport: updatedItem.sport,
+                name: updatedItem.name,
+                sub: updatedItem.sub,
+                url: updatedItem.url,
+                note: updatedItem.note
+              });
+
+              // Если мы находились на странице этого спорта, обновляем индекс на актуальный
+              if (currentView === 'sport' && activeSportIndex !== null) {
+                const newIdx = SPORTS_DATA.findIndex(s => s.sport.toLowerCase() === updatedItem.sport.toLowerCase());
+                if (newIdx !== -1) activeSportIndex = newIdx;
+              }
+
+              refreshCurrentUI();
+              window.appCloseEditModal();
+              showToast('Изменения сохранены в общей базе!');
+            } else if (result && result.status === 'duplicate') {
+              editStatusMsg.textContent = 'Такой URL уже существует в другой строке таблицы.';
+              editStatusMsg.className = 'text-xs px-3 py-2 rounded-lg bg-amber-50 text-amber-800 border border-amber-200';
+              editStatusMsg.classList.remove('hidden');
+            } else if (result && result.status === 'unauthorized') {
+              window.appLogoutEditor();
+              window.appCloseEditModal();
+              showToast('Ваш ключ доступа больше не действителен.');
+            } else {
+              editStatusMsg.textContent = 'Не удалось сохранить изменения. Проверьте поля.';
+              editStatusMsg.className = 'text-xs px-3 py-2 rounded-lg bg-rose-50 text-rose-700 border border-rose-200';
+              editStatusMsg.classList.remove('hidden');
+            }
+          } catch (err) {
+            editStatusMsg.textContent = 'Ошибка сети при сохранении в Google Таблицу. Попробуйте ещё раз.';
+            editStatusMsg.className = 'text-xs px-3 py-2 rounded-lg bg-rose-50 text-rose-700 border border-rose-200';
+            editStatusMsg.classList.remove('hidden');
+          } finally {
+            editSubmitBtn.disabled = false;
+            editSubmitBtn.textContent = 'Сохранить изменения';
           }
         });
 
@@ -1243,7 +1586,7 @@
                   </div>
                 </div>
                 <div class="md:col-span-7 divide-y divide-slate-100">
-                  ${renderLinksColumn(m.champ.links)}
+                  ${renderLinksColumn(m.champ.links, { sport: m.sport, champ: m.champ.name })}
                 </div>
               </div>
             </div>
@@ -1322,7 +1665,7 @@
                   ${subsSummaryHtml}
                 </div>
                 <div class="md:col-span-7 divide-y divide-slate-100">
-                  ${renderLinksColumn(champ.links)}
+                  ${renderLinksColumn(champ.links, { sport: sportObj.sport, champ: champ.name })}
                 </div>
               </div>
             `;
